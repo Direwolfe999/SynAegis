@@ -318,8 +318,8 @@ export default function KinesisOrb({ state, userLevel, aiLevel, rippling = false
             const pDist = dynamicRadius * (1.15 + noise(pi * 3.7 + now * 0.35, pi * 2.1) * 0.45 * (0.4 + level));
             const px = cx + Math.cos(pAngle) * pDist;
             const py = cy + Math.sin(pAngle) * pDist;
-            const pSize = 0.8 + noise(pi * 5.1, now) * 1.8;
-            const pAlpha = 0.25 + noise(pi * 7.3, now * 0.5) * 0.55;
+            const pSize = Math.max(0.1, 0.8 + noise(pi * 5.1, now) * 1.8);
+            const pAlpha = Math.max(0, 0.25 + noise(pi * 7.3, now * 0.5) * 0.55);
             ctx.beginPath();
             ctx.arc(px, py, pSize, 0, Math.PI * 2);
             ctx.fillStyle = `rgba(255,255,255,${pAlpha})`;

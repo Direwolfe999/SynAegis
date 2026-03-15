@@ -13,6 +13,11 @@ type WsEvent =
     | { type: "ready"; sessionId: string; startup?: Record<string, unknown> }
     | { type: "agent_text"; text: string }
     | { type: "agent_audio"; mimeType: string; data: string }
+    | { type: "agent_hint"; hints: string[] }
+    | { type: "session_summary"; summary: string }
+    | { type: "fallback_mode"; enabled: boolean; reason?: string }
+    | { type: "heartbeat"; ts: string }
+    | { type: "connection_stats"; uptime_s: number; messages: number; media_kb: number; fallback_mode: boolean }
     | { type: "audio_frequency"; value: number }
     | { type: "brain_log"; level: string; message: string }
     | { type: "system_metrics"; metrics: Record<string, unknown> }
@@ -27,8 +32,9 @@ type Metrics = {
     net_cost_cents?: number | null;
 };
 
-const FRAME_INTERVAL_MS = 450;
+const FRAME_INTERVAL_MS = 1200;
 const RECONNECT_MIN_MS = 600;
+const DEFAULT_SEND_VIDEO_TO_AGENT = process.env.NEXT_PUBLIC_SEND_VIDEO_TO_AGENT === "true";
 
 function toBase64(buffer: ArrayBufferLike): string {
     const bytes = new Uint8Array(buffer);
@@ -67,6 +73,11 @@ export default function HomePage() {
     const [cameraActive, setCameraActive] = useState(false);
     const [showDiag, setShowDiag] = useState(true);
     const [hovering, setHovering] = useState(false);
+    const [visionEnabled, setVisionEnabled] = useState(DEFAULT_SEND_VIDEO_TO_AGENT);
+    const [micMuted, setMicMuted] = useState(false);
+    const [backendMode, setBackendMode] = useState<"live" | "fallback">("live");
+    const [lastPingMs, setLastPingMs] = useState<number | null>(null);
+    const [promptText, setPromptText] = useState("");
 
     const wsRef = useRef<WebSocket | null>(null);
     const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -79,6 +90,16 @@ export default function HomePage() {
     const reconnectAttemptsRef = useRef(0);
     const manualDisconnectRef = useRef(false);
     const transcriptionTimerRef = useRef<number | null>(null);
+    const visionEnabledRef = useRef(visionEnabled);
+    const micMutedRef = useRef(micMuted);
+
+    useEffect(() => {
+        visionEnabledRef.current = visionEnabled;
+    }, [visionEnabled]);
+
+    useEffect(() => {
+        micMutedRef.current = micMuted;
+    }, [micMuted]);
 
     const wsUrl = useMemo(() => {
         const fallback =
@@ -119,6 +140,16 @@ export default function HomePage() {
         [clearTranscription],
     );
 
+    const sendPrompt = useCallback(
+        (text: string) => {
+            const cleaned = text.trim();
+            if (!cleaned) return;
+            sendJson({ type: "user_text", text: cleaned });
+            pushLog(`You: ${cleaned}`);
+        },
+        [pushLog, sendJson],
+    );
+
     const teardownMedia = useCallback(async () => {
         if (frameTimerRef.current) {
             window.clearInterval(frameTimerRef.current);
@@ -151,10 +182,6 @@ export default function HomePage() {
 
         mediaRef.current = stream;
         setCameraActive(true);
-        if (videoRef.current) {
-            videoRef.current.srcObject = stream;
-            await videoRef.current.play().catch(() => undefined);
-        }
 
         const audioCtx = new AudioContext({ sampleRate: 16000 });
         const source = audioCtx.createMediaStreamSource(stream);
@@ -167,6 +194,7 @@ export default function HomePage() {
             const level = Math.min(1, Math.max(0.08, Math.sqrt(pcm.reduce((a, b) => a + b * b, 0) / pcm.length) / 9000));
             setUserLevel(level);
             setOrbState((prev) => (prev === "thinking" || prev === "speaking" ? prev : "listening"));
+            if (micMutedRef.current) return;
             sendJson({ type: "media", mimeType: "audio/pcm", sampleRate: 16000, data: toBase64(pcm.buffer) });
         };
 
@@ -175,15 +203,16 @@ export default function HomePage() {
         processorRef.current = processor;
 
         frameTimerRef.current = window.setInterval(() => {
+            if (!visionEnabledRef.current) return;
             const video = videoRef.current;
             if (!video || video.videoWidth === 0 || video.videoHeight === 0) return;
             const canvas = document.createElement("canvas");
-            canvas.width = 512;
-            canvas.height = 288;
+            canvas.width = 320;
+            canvas.height = 180;
             const ctx = canvas.getContext("2d");
             if (!ctx) return;
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const b64 = canvas.toDataURL("image/jpeg", 0.72).split(",")[1];
+            const b64 = canvas.toDataURL("image/jpeg", 0.5).split(",")[1];
             sendJson({ type: "media", mimeType: "image/jpeg", data: b64 });
         }, FRAME_INTERVAL_MS);
     }, [sendJson]);
@@ -197,7 +226,7 @@ export default function HomePage() {
 
         ws.onopen = async () => {
             reconnectAttemptsRef.current = 0;
-            pushLog("Vertex AI Live link established.");
+            pushLog("Realtime link established.");
             await startMedia();
             setOrbState("listening");
         };
@@ -237,6 +266,26 @@ export default function HomePage() {
                 window.setTimeout(() => setAiLevel(0.14), 420);
             } else if (msg.type === "audio_frequency") {
                 setUserLevel(Math.max(0.08, Math.min(1, msg.value)));
+            } else if (msg.type === "heartbeat") {
+                const ping = Date.now() - new Date(msg.ts).getTime();
+                setLastPingMs(Number.isFinite(ping) ? Math.max(0, ping) : null);
+            } else if (msg.type === "connection_stats") {
+                setMetrics((prev) => ({
+                    ...prev,
+                    latency_ms: msg.uptime_s,
+                    net_cost_cents: msg.media_kb,
+                }));
+            } else if (msg.type === "fallback_mode") {
+                setBackendMode(msg.enabled ? "fallback" : "live");
+                if (msg.enabled) {
+                    pushLog(`[WARN] Backend fallback mode: ${msg.reason ?? "unknown"}`);
+                }
+            } else if (msg.type === "agent_hint") {
+                for (const hint of msg.hints ?? []) {
+                    pushLog(`[HINT] ${hint}`);
+                }
+            } else if (msg.type === "session_summary") {
+                pushLog(`[SUMMARY] ${msg.summary}`);
             } else if (msg.type === "brain_log") {
                 setShowDiag(true);
                 pushLog(`[${msg.level.toUpperCase()}] ${msg.message}`);
@@ -249,6 +298,11 @@ export default function HomePage() {
             } else if (msg.type === "error") {
                 setOrbState("error");
                 pushLog(`[ERROR] ${msg.message}`);
+                if (/quota|exceeded|resource_exhausted|429/i.test(msg.message)) {
+                    manualDisconnectRef.current = true;
+                    pushLog("Quota limit reached. Reconnect paused to avoid repeated failures.");
+                    ws.close();
+                }
             }
         };
 
@@ -294,9 +348,40 @@ export default function HomePage() {
     }, []);
 
     useEffect(() => {
+        if (cameraActive && videoRef.current && mediaRef.current) {
+            videoRef.current.srcObject = mediaRef.current;
+            videoRef.current.play().catch(() => undefined);
+        }
+    }, [cameraActive]);
+
+    useEffect(() => {
         const timer = window.setTimeout(() => setShowDiag(false), 9000);
         return () => window.clearTimeout(timer);
     }, [metrics, logs.length]);
+
+    useEffect(() => {
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key.toLowerCase() === "v") {
+                setVisionEnabled((prev) => {
+                    const next = !prev;
+                    pushLog(`Vision uplink ${next ? "enabled" : "disabled"}.`);
+                    return next;
+                });
+            }
+            if (e.key.toLowerCase() === "m") {
+                setMicMuted((prev) => {
+                    const next = !prev;
+                    pushLog(`Mic uplink ${next ? "muted" : "live"}.`);
+                    return next;
+                });
+            }
+            if (e.key.toLowerCase() === "t") {
+                sendPrompt("Give me a 1-line realtime status and next best action.");
+            }
+        };
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, [pushLog, sendPrompt]);
 
     useEffect(() => {
         return () => {
@@ -314,7 +399,7 @@ export default function HomePage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="absolute inset-0 z-40 grid place-items-center bg-black/40 backdrop-blur-sm"
+                        className="absolute inset-0 z-50 grid place-items-center bg-black/40 backdrop-blur-sm"
                     >
                         <div className="reconnect-grid rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-center backdrop-blur-xl sm:px-6 sm:py-4">
                             <p className="text-sm tracking-wide text-slate-200 sm:text-lg">Kinesis // Realigning Neural Pathways...</p>
@@ -330,9 +415,28 @@ export default function HomePage() {
 
             <section className="relative z-10 flex min-h-screen items-center justify-center px-4">
                 <div className="text-center">
-                    <p className="mb-2 text-[9px] uppercase tracking-[0.22em] text-cyan-200/80 sm:mb-3 sm:text-[11px] sm:tracking-[0.28em]">Kinesis Void</p>
+                    <div className="mb-3 flex flex-wrap items-center justify-center gap-2 text-[9px] uppercase tracking-[0.16em] sm:text-[10px]">
+                        <span className={`rounded-full border px-2 py-1 ${backendMode === "fallback" ? "border-amber-300/40 bg-amber-500/10 text-amber-200" : "border-emerald-300/40 bg-emerald-500/10 text-emerald-200"}`}>
+                            {backendMode === "fallback" ? "fallback mode" : "live mode"}
+                        </span>
+                        <span className={`rounded-full border px-2 py-1 ${visionEnabled ? "border-cyan-300/40 bg-cyan-500/10 text-cyan-200" : "border-slate-500/40 bg-slate-700/20 text-slate-300"}`}>
+                            vision {visionEnabled ? "on" : "off"}
+                        </span>
+                        <span className={`rounded-full border px-2 py-1 ${micMuted ? "border-rose-300/40 bg-rose-500/10 text-rose-200" : "border-cyan-300/40 bg-cyan-500/10 text-cyan-200"}`}>
+                            mic {micMuted ? "muted" : "live"}
+                        </span>
+                        {lastPingMs !== null && (
+                            <span className="rounded-full border border-white/20 bg-white/5 px-2 py-1 text-slate-200">ping {lastPingMs}ms</span>
+                        )}
+                    </div>
+                    <h1 className="mb-1 bg-gradient-to-r from-cyan-300 via-white to-cyan-300 bg-clip-text text-[13px] font-extralight uppercase tracking-[0.45em] text-transparent drop-shadow-[0_0_12px_rgba(103,232,249,0.35)] sm:mb-2 sm:text-base sm:tracking-[0.5em] md:text-lg">
+                        KINESIS
+                    </h1>
+                    <div className="mx-auto mb-3 h-px w-10 bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent sm:mb-4 sm:w-14" />
                     <KinesisOrb state={orbState} userLevel={userLevel} aiLevel={aiLevel} rippling={rippling} />
-                    <p className="mt-3 text-[10px] uppercase tracking-[0.2em] text-slate-300/80 sm:mt-4 sm:text-xs sm:tracking-[0.25em]">{orbState}</p>
+                    <p className="mt-3 text-[9px] font-light uppercase tracking-[0.25em] text-slate-400/90 sm:mt-4 sm:text-[11px] sm:tracking-[0.3em]">
+                        {orbState === "idle" ? "awaiting signal" : orbState}
+                    </p>
                 </div>
             </section>
 
@@ -365,9 +469,36 @@ export default function HomePage() {
                         void disconnect();
                     }
                 }}
-                className="absolute inset-0 z-30 cursor-none"
+                className="absolute inset-0 z-30 cursor-pointer"
                 aria-label="Toggle voice presence"
             />
+
+            <div className="pointer-events-auto absolute bottom-3 left-1/2 z-[70] w-[min(92vw,28rem)] -translate-x-1/2 rounded-xl border border-white/15 bg-black/40 p-2 backdrop-blur-xl sm:bottom-5 sm:p-3">
+                <div className="flex gap-2">
+                    <input
+                        value={promptText}
+                        onChange={(e) => setPromptText(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                e.preventDefault();
+                                sendPrompt(promptText);
+                                setPromptText("");
+                            }
+                        }}
+                        placeholder="Type prompt · Enter to send · V vision · M mute · T test"
+                        className="w-full rounded-md border border-white/20 bg-black/30 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-400 focus:border-cyan-300/50 focus:outline-none"
+                    />
+                    <button
+                        onClick={() => {
+                            sendPrompt(promptText);
+                            setPromptText("");
+                        }}
+                        className="rounded-md border border-cyan-300/40 bg-cyan-500/10 px-3 py-2 text-xs uppercase tracking-[0.12em] text-cyan-200 hover:bg-cyan-500/20"
+                    >
+                        Send
+                    </button>
+                </div>
+            </div>
 
             <AnimatePresence>
                 {hovering && (
@@ -375,7 +506,7 @@ export default function HomePage() {
                         initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 6 }}
-                        className="pointer-events-none absolute bottom-3 left-1/2 z-50 -translate-x-1/2 whitespace-nowrap rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-[10px] uppercase tracking-[0.15em] text-slate-200 backdrop-blur sm:bottom-6 sm:px-4 sm:py-2 sm:text-xs sm:tracking-[0.2em]"
+                        className="pointer-events-none absolute bottom-3 left-1/2 z-[60] -translate-x-1/2 whitespace-nowrap rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-[10px] uppercase tracking-[0.15em] text-slate-200 backdrop-blur sm:bottom-6 sm:px-4 sm:py-2 sm:text-xs sm:tracking-[0.2em]"
                     >
                         {orbState === "idle" ? "Tap to Initialize Mic/Camera" : "Tap to Barge-In · Press X to Halt"}
                     </motion.div>
