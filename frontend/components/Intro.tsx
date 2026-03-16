@@ -34,7 +34,7 @@ export default function Intro() {
                     <div className="mb-12 flex justify-center">
                         <div className="relative w-64 h-64 md:w-80 md:h-80">
                             <Image
-                                src="/images/kinesis-logo.png"
+                                src="/images/kinesis-logo.svg"
                                 alt="Kinesis Logo"
                                 fill
                                 className="object-contain drop-shadow-2xl"
