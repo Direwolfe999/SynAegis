@@ -94,6 +94,80 @@ Open: `http://localhost:3000`
 
 ---
 
+## 4a) Reproducible Testing Instructions
+
+### Prerequisites Check
+```bash
+# Verify Python version (need 3.10+)
+python3 --version
+
+# Verify Node version (need 16+)
+node --version
+
+# Verify npm
+npm --version
+```
+
+### Automated Setup (One Command)
+```bash
+# From project root
+chmod +x setup_env.sh
+./setup_env.sh
+```
+
+### Manual Backend Test
+```bash
+# Test Python imports
+python3 -c "import google.generativeai; print('✅ google-genai working')"
+
+# Test FastAPI startup
+cd backend
+python3 -m py_compile main_production.py
+echo "✅ Backend syntax valid"
+
+# Start backend (shows startup)
+GOOGLE_API_KEY=test BACKEND_PORT=8080 python3 main_production.py &
+sleep 3
+curl http://localhost:8080/healthz && echo "✅ Backend responding"
+```
+
+### Frontend Build Test
+```bash
+cd frontend
+npm run build 2>&1 | tail -10
+```
+Expected: `✓ Generating static pages (4/4)`
+
+### Full Integration Test (Local)
+```bash
+# Terminal 1: Backend
+export GOOGLE_API_KEY="your_key_here"
+cd backend
+BACKEND_PORT=8080 python3 main_production.py
+
+# Terminal 2: Frontend
+cd frontend
+npm run dev -- --port 3000
+
+# Terminal 3: Verify connection
+sleep 5
+curl -s http://localhost:8080/healthz | grep "online" && echo "✅ Backend alive"
+curl -s http://localhost:3000 | grep "Kinesis" && echo "✅ Frontend alive"
+```
+
+### Test Checklist
+- [ ] Python 3.10+ installed
+- [ ] Node 16+ installed  
+- [ ] `pip install -r backend/requirements.txt` succeeds
+- [ ] `npm install` in frontend succeeds
+- [ ] Backend starts on port 8080 without errors
+- [ ] Frontend builds successfully
+- [ ] Web UI loads at http://localhost:3000
+- [ ] Intro page displays with logo
+- [ ] Microphone permission can be granted
+
+---
+
 ## 5) Environment configuration
 
 Root `.env`:
@@ -170,3 +244,40 @@ These files are intended to support the “proof of Google Cloud deployment” r
 - [ ] Cloud deployment proof included
 - [ ] README maps features to judging rubric
 - [ ] Bonus: post build-writeup + hashtag + IaC/deploy automation evidence
+
+---
+
+## 11) Google Cloud Shell Deployment (Copy-Paste Ready)
+
+### One-Command Deploy
+
+```bash
+git clone https://github.com/Direwolfe999/Kinesis.git && cd Kinesis && export GOOGLE_API_KEY="your_key_here" && chmod +x setup_env.sh && ./setup_env.sh && BACKEND_PORT=8080 python3 backend/main_production.py
+```
+
+### Step-by-Step in Cloud Shell
+
+```bash
+# 1. Clone
+git clone https://github.com/Direwolfe999/Kinesis.git
+cd Kinesis
+
+# 2. Set API key (get from https://aistudio.google.com/apikey)
+export GOOGLE_API_KEY="your_key_here"
+
+# 3. Run setup
+./setup_env.sh
+
+# 4. Start backend on port 8080
+BACKEND_PORT=8080 python3 backend/main_production.py
+
+# 5. Click "Web Preview" → port 8080 in top-right corner
+```
+
+### Linking to Your Project
+
+1. Replace `https://github.com/Direwolfe999/Kinesis.git` with your fork URL
+2. Update `GOOGLE_API_KEY` with your actual key from [Google AI Studio](https://aistudio.google.com/apikey)
+3. Rest of commands stay the same
+
+**No billing account needed. Free tier only.**
