@@ -64,7 +64,7 @@ if not GOOGLE_API_KEY:
     raise ValueError("❌ GOOGLE_API_KEY not in .env")
 
 MODEL_CASCADE = [
-    "gemini-2.5-flash-native-audio-latest"
+    "gemini-2.0-flash"
 ]
 
 SYSTEM_INSTRUCTION = """You are SynAegis - An Autonomous DevOps War Room Agent.
@@ -413,147 +413,20 @@ async def health():
 
 @app.post("/chat")
 async def chat(request: dict):
-    """REST endpoint for text chat."""
     if not gemini_live:
         raise HTTPException(status_code=503, detail="Backend not ready")
-    
     message = request.get("message", "")
     if not message:
         raise HTTPException(status_code=400, detail="No message")
     
-    full_response = ""
-    model_used = None
-    
     try:
-        async for chunk in gemini_live.stream_response(message):
-            if chunk["type"] == "text":
-                full_response += chunk["content"]
-                model_used = chunk["model"]
-        
-        return {
-            "success": True,
-            "response": full_response,
-            "model": model_used,
-        }
-    
+        response = gemini_live.client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=message
+        )
+        return {"success": True, "response": response.text, "model": "gemini-2.5-flash"}
     except Exception as e:
-        return {
-            "success": False,
-            "error": str(e)[:100],
-        }
-
-
-
-@app.post("/webhook/gitlab")
-async def gitlab_webhook(request: Request):
-    payload = await request.json()
-    event_type = payload.get("object_kind")
-    
-    logger.info(f"Received GitLab Webhook: {event_type}")
-    
-    # Simple webhook router
-    if event_type == "pipeline":
-        status = payload.get("object_attributes", {}).get("status")
-        if status == "failed":
-            # Feature 5: Flaky Test Healer
-            logger.info("Pipeline failed. Triggering Auto-Healer Agent...")
-            return {"status": "accepted", "action": "flaky_test_healer_triggered"}
-            
-    elif event_type == "merge_request":
-        action = payload.get("object_attributes", {}).get("action")
-        if action == "open":
-            # Feature 10: Anthropic Summary
-            logger.info("MR Opened. Triggering Anthropic Summarizer...")
-            return {"status": "accepted", "action": "anthropic_summary_triggered"}
-        elif action == "merge":
-            # Feature 6: Compliance Auditor
-            logger.info("MR Merged. Triggering Compliance Auditor...")
-            return {"status": "accepted", "action": "compliance_auditor_triggered"}
-            
-    elif event_type == "vulnerability":
-        # Feature 4: Zero touch vuln
-        logger.info("Vulnerability found. Triggering Zero-Touch Fixer...")
-        return {"status": "accepted", "action": "vulnerability_fixer_triggered"}
-
-    elif event_type == "tag_push":
-        # Feature 15: Release notes generator
-        logger.info("Tag pushed. Triggering Release Notes Generator...")
-        return {"status": "accepted", "action": "release_notes_triggered"}
-        
-    return {"status": "accepted", "event": event_type}
-
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    """WebSocket for real-time streaming."""
-    if not gemini_live:
-        await websocket.close(code=1008, reason="Backend not ready")
-        return
-    
-    await websocket.accept()
-    logger.info("📡 WebSocket connected")
-    
-    async def send_metrics():
-        while True:
-            try:
-                metrics = {
-                    "cpu": psutil.cpu_percent(),
-                    "ram": psutil.virtual_memory().percent,
-                    "disk": psutil.disk_usage('/').percent
-                }
-                await websocket.send_json({"type": "system_metrics", "metrics": metrics})
-                await asyncio.sleep(3)
-            except:
-                break
-    
-    metrics_task = asyncio.create_task(send_metrics())
-    
-    try:
-        while True:
-            # Receive message
-            data = await websocket.receive_text()
-            payload = json.loads(data)
-            message = payload.get("message", payload.get("text", ""))
-            
-            msg_type = payload.get("type", "")
-            if not message:
-                if msg_type in ["media", "barge_in"]:
-                    # Do not throw an empty message error for pure media frames
-                    continue
-                await websocket.send_json({"type": "error", "content": "Empty message component"})
-                continue
-            
-            logger.info(f"📨 Realtime Msg Router: Type={msg_type}, Content={message[:30]}...")
-            
-            if msg_type == "user_text":
-                # Route standard chat text to 2.5-flash immediately
-                try:
-                    res_text = await gemini_live.get_text_response(message)
-                    await websocket.send_json({
-                        "type": "agent_text",
-                        "text": res_text
-                    })
-                except Exception as e:
-                    await websocket.send_json({"type": "error", "content": str(e)})
-                continue
-
-            # Route audio/voice interactions to Native Audio Model via stream
-            async for chunk in gemini_live.stream_response(message):
-                await websocket.send_json(chunk)
-            
-            # Signal done
-            await websocket.send_json({"type": "done", "content": "Response complete"})
-    
-    except Exception as e:
-        logger.error(f"WebSocket error: {e}")
-        try:
-            await websocket.send_json({"type": "error", "content": str(e)[:100]})
-        except:
-            pass
-    
-    finally:
-        metrics_task.cancel()
-        logger.info("📡 WebSocket disconnected")
-
+        return {"success": False, "error": str(e)}
 
 # ═══════════════════════════════════════════════════════════════════════════
 # MAIN
