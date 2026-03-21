@@ -27,45 +27,30 @@ export default function Intro() {
             <div className="relative min-h-screen flex items-center justify-center px-4 py-20">
                 {/* Logo - Fade and scale in */}
                 <div
-                    className={`text-center transform transition-all duration-1000 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-                        }`}
+                    className={`text-center transform transition-all duration-1000 ${
+                        isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+                    }`}
                 >
-                    {/* Kinesis Logo */}
-                    <div className="mb-12 flex justify-center">
-                        <div className="relative w-64 h-64 md:w-80 md:h-80">
-                            <Image
-                                src="/images/kinesis-logo.svg"
-                                alt="Kinesis Logo"
-                                fill
-                                className="object-contain drop-shadow-2xl"
-                                priority
-                                style={{
-                                    filter: 'drop-shadow(0 0 30px rgba(59, 130, 246, 0.3))',
-                                }}
-                            />
-                        </div>
-                    </div>
-
                     {/* Tagline */}
                     <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-blue-300 to-cyan-400 bg-clip-text text-transparent">
-                        KINESIS
+                        SynAegis
                     </h1>
 
                     <p className="text-xl md:text-2xl text-gray-300 mb-4 max-w-2xl mx-auto leading-relaxed">
-                        The Living Multimodal Agent
+                        The Voice-Activated DevOps War Room
                     </p>
 
                     <p className="text-lg md:text-xl text-gray-400 mb-12 max-w-3xl mx-auto">
-                        Real-time perception. Instant action. Seamless adaptation.
+                        Orchestrating pipelines. Patching vulnerabilities. Real-time engineering.
                     </p>
 
                     {/* Feature Pills */}
                     <div className="flex flex-wrap justify-center gap-4 mb-16">
                         {[
-                            '🎵 Real-Time Audio',
-                            '📹 Multimodal',
-                            '⚡ Barge-In',
-                            '🔄 Graceful Fallback',
+                            '🛡️ Automated Security',
+                            '🌐 GitLab CI/CD Flows',
+                            '⚡ Voice Rollbacks',
+                            '🌿 Green Cloud Ops',
                         ].map((feature, idx) => (
                             <div
                                 key={idx}
@@ -84,7 +69,7 @@ export default function Intro() {
                         }}
                         className="px-10 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg font-semibold text-lg hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 transform hover:scale-105"
                     >
-                        Enter Kinesis
+                        Enter War Room
                     </button>
 
                     {/* Scroll indicator */}
@@ -108,22 +93,22 @@ export default function Intro() {
             <div className="relative py-32 px-4">
                 <div className="max-w-6xl mx-auto">
                     <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                        Why Kinesis?
+                        Why SynAegis?
                     </h2>
 
                     <div className="grid md:grid-cols-3 gap-8">
                         {[
                             {
-                                title: '🔗 Real-Time Connection',
-                                desc: 'Perceives audio, video, and context simultaneously. Not turn-based, not buffered—alive.',
+                                title: '⚡ Voice Pipeline Control',
+                                desc: 'Interrupt deployments via real-time voice commands when critical incidents occur.',
                             },
                             {
-                                title: '🛑 Barge-In Ready',
-                                desc: 'Interrupt mid-response. System pivots instantly with zero latency frustration.',
+                                title: '🛡️ Zero-Touch Vulnerability Fixes',
+                                desc: 'Listens to GitLab Security Webhooks, patches code autonomously, and opens MRs.',
                             },
                             {
-                                title: '🔄 Quota Resilient',
-                                desc: 'When API limits hit, gracefully fallback to secondary models. Experience never breaks.',
+                                title: '♻️ Green Agent Scans',
+                                desc: 'Shuts down idle review apps, scales pipelines based on carbon intensity.',
                             },
                         ].map((item, idx) => (
                             <div
@@ -138,38 +123,11 @@ export default function Intro() {
                 </div>
             </div>
 
-            {/* Tech Stack Section */}
-            <div className="relative py-32 px-4 bg-gradient-to-b from-transparent to-blue-950/20">
-                <div className="max-w-6xl mx-auto">
-                    <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center text-gray-100">
-                        Built on Innovation
-                    </h2>
-
-                    <div className="grid md:grid-cols-4 gap-6">
-                        {[
-                            { icon: '🤖', title: 'Gemini 2.5 Flash', desc: 'Next-gen LLM' },
-                            { icon: '⚡', title: 'Live API', desc: 'Real-time streaming' },
-                            { icon: '🔌', title: 'WebSocket', desc: 'Persistent connection' },
-                            { icon: '🌐', title: 'Full Stack', desc: 'Next.js + FastAPI' },
-                        ].map((tech, idx) => (
-                            <div
-                                key={idx}
-                                className="p-6 rounded-lg bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-400/30 text-center"
-                            >
-                                <div className="text-4xl mb-3">{tech.icon}</div>
-                                <h3 className="font-bold text-blue-300 mb-2">{tech.title}</h3>
-                                <p className="text-sm text-gray-400">{tech.desc}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
             {/* CTA Footer */}
             <div className="relative py-16 px-4 text-center border-t border-white/10">
                 <div className="max-w-4xl mx-auto">
                     <h3 className="text-2xl md:text-3xl font-bold mb-6 text-white">
-                        Ready to experience the future of AI?
+                        Built for the GitLab AI Hackathon
                     </h3>
                     <button
                         onClick={() => {
@@ -178,10 +136,10 @@ export default function Intro() {
                         }}
                         className="px-12 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg font-bold text-white hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 transform hover:scale-105 mb-6"
                     >
-                        Launch Kinesis
+                        Launch SynAegis
                     </button>
                     <p className="text-gray-400 text-sm">
-                        Built for the Gemini Live Agent Challenge
+                        You Orchestrate. AI Accelerates.
                     </p>
                 </div>
             </div>

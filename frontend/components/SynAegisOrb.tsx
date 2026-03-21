@@ -103,10 +103,10 @@ function lerpColorHex(a: string, b: string, t: number): string {
 }
 
 /* ═══════════════════════════════════════════════════════
-   KinesisOrb — Canvas-rendered Siri-like AI orb
+   SynAegisOrb — Canvas-rendered Siri-like AI orb
    60fps Perlin noise waveform distortion + glow + particles
    ═══════════════════════════════════════════════════════ */
-export default function KinesisOrb({ state, userLevel, aiLevel, rippling = false }: Props) {
+export default function SynAegisOrb({ state, userLevel, aiLevel, rippling = false }: Props) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const animRef = useRef<number>(0);
     const noiseRef = useRef<((x: number, y: number) => number) | null>(null);

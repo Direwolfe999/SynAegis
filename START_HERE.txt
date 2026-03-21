@@ -1,6 +1,6 @@
 ╔════════════════════════════════════════════════════════════════════════════════╗
 ║                                                                                ║
-║                    KINESIS - START HERE (FINAL SUBMISSION)                   ║
+║                    SynAegis - START HERE (FINAL SUBMISSION)                   ║
 ║                                                                                ║
 ║                         Less than 1 hour to deadline                         ║
 ║                                                                                ║
@@ -44,7 +44,7 @@
 ✅ backend/main_production.py
    └─ Proof of Google Cloud API integration
    └─ Link to show in Devpost: 
-      https://github.com/Direwolfe999/Kinesis/blob/main/backend/main_production.py
+      https://github.com/Direwolfe999/SynAegis/blob/main/backend/main_production.py
    👉 LINK THIS FOR DEPLOYMENT PROOF
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -94,7 +94,7 @@ All 5 go to Gemini to generate your complete video script.
 
 🎯 PROOF OF GOOGLE CLOUD DEPLOYMENT (FOR DEVPOST):
 
-Link to code: https://github.com/Direwolfe999/Kinesis/blob/main/backend/main_production.py
+Link to code: https://github.com/Direwolfe999/SynAegis/blob/main/backend/main_production.py
 
 Shows:
   - Lines 50-70: Gemini Live API initialization
@@ -109,7 +109,7 @@ This proves you're using Google Cloud APIs ✅
 📋 DEVPOST FORM (FILL WITH THESE):
 
 Field: Project Title
-Value: Kinesis: Live Conversation Agent
+Value: SynAegis: Live Conversation Agent
 
 Field: Tagline
 Value: Interactive voice agent powered by Gemini Live API with real-time 
@@ -119,7 +119,7 @@ Field: Description
 Value: (Copy from DEVPOST_DESCRIPTION_FINAL.md)
 
 Field: GitHub URL
-Value: https://github.com/Direwolfe999/Kinesis
+Value: https://github.com/Direwolfe999/SynAegis
 
 Field: Demo Video
 Value: (Your YouTube link - you'll get this after recording)

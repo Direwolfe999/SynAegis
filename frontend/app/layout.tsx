@@ -1,22 +1,26 @@
-import "./globals.css";
-import type { Metadata } from "next";
-import { ReactNode } from "react";
+import './globals.css'
+import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-    title: "Kinesis // Autonomous Multimodal Lifeform",
-    description: "Gemini 3 Flash real-time multimodal agent with autonomous cloud agency",
-};
+  title: 'SynAegis | Autonomous DevOps War Room',
+  description: 'AI-driven operations and orchestration platform',
+  icons: {
+    icon: '/logos/favicon.png',
+    shortcut: '/logos/favicon.png',
+    apple: '/logos/favicon.png',
+  },
+}
 
-export default function RootLayout({ children }: { children: ReactNode }) {
-    return (
-        <html lang="en">
-            <head>
-                <link
-                    href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600&display=swap"
-                    rel="stylesheet"
-                />
-            </head>
-            <body className="min-h-screen bg-[#050505] text-slate-100 antialiased">{children}</body>
-        </html>
-    );
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en" className="dark">
+      <body className="antialiased font-sans text-slate-800 bg-white dark:text-slate-100 dark:bg-[#050505] transition-colors duration-500">
+        {children}
+      </body>
+    </html>
+  )
 }

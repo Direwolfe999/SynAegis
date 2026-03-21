@@ -1,4 +1,4 @@
-# Kinesis: Real-Time Multimodal AI Agent
+# SynAegis: Real-Time Multimodal AI Agent
 # Python 3.10+ required
 # Usage: pip install --user -r requirements.txt
 

@@ -5,28 +5,28 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: kinesis-backend
+    container_name: SynAegis-backend
     ports:
       - "8080:8080"
     environment:
-      - GOOGLE_APPLICATION_CREDENTIALS=/app/kinesis-service-account.json
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/SynAegis-service-account.json
       - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT}
       - GOOGLE_CLOUD_LOCATION=${GOOGLE_CLOUD_LOCATION:-us-central1}
       - GEMINI_MODEL=${GEMINI_MODEL:-gemini-3-flash-live}
-      - KINESIS_MEMORY_BUCKET=${KINESIS_MEMORY_BUCKET}
+      - SynAegis_MEMORY_BUCKET=${SynAegis_MEMORY_BUCKET}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
     volumes:
-      - ./kinesis-489618-fea62a57a2c6.json:/app/kinesis-service-account.json:ro
+      - ./SynAegis-489618-fea62a57a2c6.json:/app/SynAegis-service-account.json:ro
 
   frontend:
     image: node:22-alpine
-    container_name: kinesis-frontend
+    container_name: SynAegis-frontend
     working_dir: /app/frontend
     command: sh -c "npm install && npm run dev -- --hostname 0.0.0.0 --port 3000"
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_BACKEND_WS_URL=ws://backend:8080/ws/kinesis
+      - NEXT_PUBLIC_BACKEND_WS_URL=ws://backend:8080/ws/SynAegis
     volumes:
       - ./:/app
     depends_on:

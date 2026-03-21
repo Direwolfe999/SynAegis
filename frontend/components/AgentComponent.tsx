@@ -1,7 +1,7 @@
 "use client";
 
-import KinesisOrb from "./KinesisOrb";
+import SynAegisOrb from "./SynAegisOrb";
 
 export default function AgentComponent() {
-    return <KinesisOrb state="idle" userLevel={0.1} aiLevel={0.1} />;
+    return <SynAegisOrb state="idle" userLevel={0.1} aiLevel={0.1} />;
 }

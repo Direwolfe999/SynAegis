@@ -63,9 +63,9 @@ def self_upgrade_protocol(api_name: str) -> dict[str, Any]:
 
 def neural_memory_snapshot(data: str, mime_type: str = "application/json", object_path: str | None = None) -> dict[str, Any]:
     project = _project_id()
-    bucket = os.getenv("KINESIS_MEMORY_BUCKET", "")
+    bucket = os.getenv("SynAegis_MEMORY_BUCKET", "")
     if not bucket:
-        raise RuntimeError("KINESIS_MEMORY_BUCKET is not configured.")
+        raise RuntimeError("SynAegis_MEMORY_BUCKET is not configured.")
 
     payload: bytes
     if mime_type == "application/json":
@@ -188,7 +188,7 @@ def fetch_secret(secret_name: str, version: str = "latest") -> dict[str, Any]:
 
 def billing_spend_report(hours: int = 24) -> dict[str, Any]:
     project = _project_id()
-    export_table = os.getenv("KINESIS_BILLING_EXPORT_TABLE", "").strip()
+    export_table = os.getenv("SynAegis_BILLING_EXPORT_TABLE", "").strip()
 
     if not export_table:
         billing = build("cloudbilling", "v1", credentials=_cloud_credentials(), cache_discovery=False)
@@ -199,13 +199,13 @@ def billing_spend_report(hours: int = 24) -> dict[str, Any]:
             "hours": hours,
             "reason": "billing_export_table_missing",
             "billing_enabled": bool(billing_info.get("billingEnabled", False)),
-            "hint": "Set KINESIS_BILLING_EXPORT_TABLE to <project>.<dataset>.<table> for cent-accurate spend reports.",
+            "hint": "Set SynAegis_BILLING_EXPORT_TABLE to <project>.<dataset>.<table> for cent-accurate spend reports.",
             "timestamp": _now_iso(),
         }
 
     match = re.match(r"^([^.]+)\.([^.]+)\.([^.]+)$", export_table)
     if not match:
-        raise RuntimeError("KINESIS_BILLING_EXPORT_TABLE must be in the format <project>.<dataset>.<table>.")
+        raise RuntimeError("SynAegis_BILLING_EXPORT_TABLE must be in the format <project>.<dataset>.<table>.")
 
     table_project, dataset, table = match.groups()
     client = bigquery.Client(project=table_project)

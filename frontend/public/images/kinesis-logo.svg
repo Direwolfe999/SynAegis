@@ -28,10 +28,10 @@
   <!-- Highlight -->
   <circle cx="180" cy="180" r="25" fill="rgb(147, 197, 253)" opacity="0.6"/>
   
-  <!-- Text: KINESIS -->
+  <!-- Text: SynAegis -->
   <text x="200" y="320" font-family="Arial, sans-serif" font-size="32" font-weight="bold" 
         text-anchor="middle" fill="rgb(59, 130, 246)" letter-spacing="2">
-    KINESIS
+    SynAegis
   </text>
   
   <!-- Subtitle -->

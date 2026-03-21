@@ -1,9 +1,9 @@
 module.exports = {
     brand: {
-        name: "Kinesis",
+        name: "SynAegis",
         palette: {
             obsidian: "#020617",
-            kinesisBlue: "#38bdf8",
+            SynAegisBlue: "#38bdf8",
             hyperViolet: "#a855f7",
             electricBlue: "#3b82f6",
             coreCyan: "#67e8f9"

@@ -1,6 +1,6 @@
-# Project Kinesis — Gemini Live Agent Challenge Submission
+# Project SynAegis — Gemini Live Agent Challenge Submission
 
-Kinesis is a realtime multimodal agent that listens, sees, speaks, explains its own runtime state, and remains demo-capable even under quota restrictions.
+SynAegis is a realtime multimodal agent that listens, sees, speaks, explains its own runtime state, and remains demo-capable even under quota restrictions.
 
 ## 1) Why this project is competitive
 
@@ -34,7 +34,7 @@ Browser (Next.js)
   └─ Status overlays, diagnostics, protocol logs
           │
           ▼
-FastAPI backend (/ws/kinesis)
+FastAPI backend (/ws/SynAegis)
   ├─ ADK LiveRequestQueue + Runner
   ├─ Event fan-out to frontend
   ├─ Fallback continuity mode when quota/model fails
@@ -76,7 +76,7 @@ Core paths:
 ### Backend
 
 ```bash
-cd /path/to/Kinesis
+cd /path/to/SynAegis
 source .venv/bin/activate
 pip install -r backend/requirements.txt
 uvicorn main:app --host 0.0.0.0 --port 8080 --reload
@@ -152,7 +152,7 @@ npm run dev -- --port 3000
 # Terminal 3: Verify connection
 sleep 5
 curl -s http://localhost:8080/healthz | grep "online" && echo "✅ Backend alive"
-curl -s http://localhost:3000 | grep "Kinesis" && echo "✅ Frontend alive"
+curl -s http://localhost:3000 | grep "SynAegis" && echo "✅ Frontend alive"
 ```
 
 ### Test Checklist
@@ -252,15 +252,15 @@ These files are intended to support the “proof of Google Cloud deployment” r
 ### One-Command Deploy
 
 ```bash
-git clone https://github.com/Direwolfe999/Kinesis.git && cd Kinesis && export GOOGLE_API_KEY="your_key_here" && chmod +x setup_env.sh && ./setup_env.sh && BACKEND_PORT=8080 python3 backend/main_production.py
+git clone https://github.com/Direwolfe999/SynAegis.git && cd SynAegis && export GOOGLE_API_KEY="your_key_here" && chmod +x setup_env.sh && ./setup_env.sh && BACKEND_PORT=8080 python3 backend/main_production.py
 ```
 
 ### Step-by-Step in Cloud Shell
 
 ```bash
 # 1. Clone
-git clone https://github.com/Direwolfe999/Kinesis.git
-cd Kinesis
+git clone https://github.com/Direwolfe999/SynAegis.git
+cd SynAegis
 
 # 2. Set API key (get from https://aistudio.google.com/apikey)
 export GOOGLE_API_KEY="your_key_here"
@@ -276,7 +276,7 @@ BACKEND_PORT=8080 python3 backend/main_production.py
 
 ### Linking to Your Project
 
-1. Replace `https://github.com/Direwolfe999/Kinesis.git` with your fork URL
+1. Replace `https://github.com/Direwolfe999/SynAegis.git` with your fork URL
 2. Update `GOOGLE_API_KEY` with your actual key from [Google AI Studio](https://aistudio.google.com/apikey)
 3. Rest of commands stay the same
 

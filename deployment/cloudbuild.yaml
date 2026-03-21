@@ -4,7 +4,7 @@ steps:
       [
         "build",
         "-t",
-        "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/kinesis-live-backend:${SHORT_SHA}",
+        "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/SynAegis-live-backend:${SHORT_SHA}",
         "-f",
         "deployment/Dockerfile",
         ".",
@@ -14,7 +14,7 @@ steps:
     args:
       [
         "push",
-        "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/kinesis-live-backend:${SHORT_SHA}",
+        "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/SynAegis-live-backend:${SHORT_SHA}",
       ]
 
   - name: gcr.io/google.com/cloudsdktool/cloud-sdk
@@ -22,8 +22,8 @@ steps:
     args:
       - -c
       - |
-        gcloud run deploy kinesis-live-backend \
-          --image ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/kinesis-live-backend:${SHORT_SHA} \
+        gcloud run deploy SynAegis-live-backend \
+          --image ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/SynAegis-live-backend:${SHORT_SHA} \
           --platform managed \
           --region ${_REGION} \
           --allow-unauthenticated \
@@ -34,7 +34,7 @@ steps:
 
 substitutions:
   _REGION: us-central1
-  _REPO: kinesis
+  _REPO: SynAegis
 
 options:
   logging: CLOUD_LOGGING_ONLY

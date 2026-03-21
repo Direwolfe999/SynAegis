@@ -1,7 +1,7 @@
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
-  name: kinesis-live-backend
+  name: SynAegis-live-backend
   annotations:
     run.googleapis.com/ingress: all
 spec:
@@ -16,7 +16,7 @@ spec:
       containerConcurrency: 40
       timeoutSeconds: 3600
       containers:
-        - image: REGION-docker.pkg.dev/PROJECT_ID/kinesis/kinesis-live-backend:latest
+        - image: REGION-docker.pkg.dev/PROJECT_ID/SynAegis/SynAegis-live-backend:latest
           ports:
             - name: http1
               containerPort: 8080

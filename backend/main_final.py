@@ -1,5 +1,5 @@
 """
-KINESIS BACKEND - PRODUCTION GEMINI LIVE API v2.0
+SynAegis BACKEND - PRODUCTION GEMINI LIVE API v2.0
 FastAPI + WebSocket with quota fallback cascade
 
 FEATURES:
@@ -46,7 +46,7 @@ except ImportError:
 # ═══════════════════════════════════════════════════════════════════════════
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("kinesis-prod")
+logger = logging.getLogger("SynAegis-prod")
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 if not GOOGLE_API_KEY:
@@ -58,7 +58,7 @@ MODEL_CASCADE = [
     "gemini-2.0-flash-lite",
 ]
 
-SYSTEM_INSTRUCTION = """You are Kinesis - a Living AI Agent.
+SYSTEM_INSTRUCTION = """You are SynAegis - a Living AI Agent.
 
 Core traits:
 - Perceive continuous streams (not turn-based chat)
@@ -215,7 +215,7 @@ class GeminiLive:
 # FASTAPI APP
 # ═══════════════════════════════════════════════════════════════════════════
 
-app = FastAPI(title="Kinesis Backend", version="2.0.0")
+app = FastAPI(title="SynAegis Backend", version="2.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -233,14 +233,14 @@ gemini_live: Optional[GeminiLive] = None
 async def startup():
     global gemini_live
     gemini_live = GeminiLive(GOOGLE_API_KEY)
-    logger.info("✅ Kinesis backend ready")
+    logger.info("✅ SynAegis backend ready")
 
 
 @app.get("/healthz")
 async def health():
     return {
         "status": "ok",
-        "service": "kinesis",
+        "service": "SynAegis",
         "version": "2.0.0",
         "models": MODEL_CASCADE,
         "current_model": gemini_live.quota.get_current_model() if gemini_live else None,
@@ -328,7 +328,7 @@ if __name__ == "__main__":
     import uvicorn
     
     port = int(os.getenv("BACKEND_PORT", 8000))
-    logger.info(f"🚀 Starting Kinesis backend on port {port}")
+    logger.info(f"🚀 Starting SynAegis backend on port {port}")
     
     uvicorn.run(
         "main_production:app",

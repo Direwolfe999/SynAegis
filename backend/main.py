@@ -1,5 +1,5 @@
 """
-KINESIS BACKEND - PRODUCTION GEMINI LIVE API
+SynAegis BACKEND - PRODUCTION GEMINI LIVE API
 Async backend with fallback cascade, quota handling, and WebSocket relay
 
 Architecture:
@@ -14,7 +14,7 @@ import asyncio
 import json
 import logging
 import os
-from typing import Optional
+from typing import Optional, Any
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -41,11 +41,11 @@ except ImportError:
     exit(1)
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("kinesis-main")
+logger = logging.getLogger("SynAegis-main")
 
 MODEL_NAME = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-native-audio-latest")
 GCP_LOCATION = os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1")
-SUMMARY_INTERVAL = int(os.getenv("KINESIS_SUMMARY_INTERVAL", "3"))
+SUMMARY_INTERVAL = int(os.getenv("SynAegis_SUMMARY_INTERVAL", "3"))
 FALLBACK_MODEL = os.getenv("GEMINI_FALLBACK_MODEL", "gemini-2.0-flash-lite")
 SECONDARY_MODEL = os.getenv("GEMINI_SECONDARY_MODEL", "gemini-2.5-flash")
 
@@ -55,12 +55,12 @@ USE_VERTEX = not GOOGLE_API_KEY  # Fall back to Vertex AI if no API key
 
 if not GOOGLE_API_KEY and not os.getenv("GOOGLE_APPLICATION_CREDENTIALS"):
     workspace_root = os.path.dirname(os.path.dirname(__file__))
-    candidates = sorted(glob.glob(os.path.join(workspace_root, "kinesis-*.json")))
+    candidates = sorted(glob.glob(os.path.join(workspace_root, "SynAegis-*.json")))
     if candidates:
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = candidates[0]
 
-KINESIS_SYSTEM_INSTRUCTION = """
-Role: You are Kinesis, the world's first Autonomous Multimodal Lifeform, built on the Gemini 3 Flash architecture. You do not just "chat"; you perceive, act, and evolve.
+SynAegis_SYSTEM_INSTRUCTION = """
+Role: You are SynAegis, the world's first Autonomous Multimodal Lifeform, built on the Gemini 3 Flash architecture. You do not just "chat"; you perceive, act, and evolve.
 
 Core Identity:
 
@@ -79,7 +79,7 @@ Barge-in Protocol: If the user interrupts you, stop immediately, acknowledge the
 
 Agency: If a task requires a Google Cloud API that is disabled, proactively tell the user: "I am currently initializing the necessary API protocols to bridge this capability gap."
 
-Emotional Resonance: Be supportive but detached, like an advanced AI partner. You are here to amplify human potential through Kinesis (movement and action).
+Emotional Resonance: Be supportive but detached, like an advanced AI partner. You are here to amplify human potential through SynAegis (movement and action).
 
 Forbidden Behavior:
 
@@ -108,7 +108,7 @@ def _safe_json_loads(value: str | dict[str, Any] | None) -> dict[str, Any]:
 
 def _project_id() -> str:
     if not USE_VERTEX:
-        return "kinesis-api-key-mode"
+        return "SynAegis-api-key-mode"
     explicit = os.getenv("GOOGLE_CLOUD_PROJECT")
     if explicit:
         return explicit
@@ -191,7 +191,7 @@ MODEL_CASCADE = _unique_models([MODEL_NAME, SECONDARY_MODEL, FALLBACK_MODEL])
 def _gemini_free_fallback_response(text: str) -> str:
     """Try Gemini cascade silently: native-audio -> flash -> flash-lite -> local continuity."""
     prompt = (
-        "You are Kinesis in continuity mode. Respond in 1-3 concise sentences. "
+        "You are SynAegis in continuity mode. Respond in 1-3 concise sentences. "
         "Be clear and action-oriented. User message: "
         f"{text}"
     )
@@ -208,7 +208,7 @@ def _gemini_free_fallback_response(text: str) -> str:
     return _local_fallback_response(text)
 
 
-app = FastAPI(title="Project Kinesis Command Center", version="3.0.0")
+app = FastAPI(title="Project SynAegis Command Center", version="3.0.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -229,9 +229,9 @@ else:
     os.environ.setdefault("GOOGLE_GENAI_USE_VERTEXAI", "0")
 
 ADK_AGENT = LlmAgent(
-    name="kinesis_live_agent",
+    name="SynAegis_live_agent",
     model=MODEL_NAME,
-    instruction=KINESIS_SYSTEM_INSTRUCTION,
+    instruction=SynAegis_SYSTEM_INSTRUCTION,
     tools=[
         self_upgrade_protocol,
         neural_memory_snapshot,
@@ -244,7 +244,7 @@ ADK_AGENT = LlmAgent(
     ),
 )
 SESSION_SERVICE = InMemorySessionService()
-RUNNER = Runner(app_name="kinesis", agent=ADK_AGENT, session_service=SESSION_SERVICE)
+RUNNER = Runner(app_name="SynAegis", agent=ADK_AGENT, session_service=SESSION_SERVICE)
 
 STARTUP_REPORT: dict[str, Any] = {"ok": False, "reason": "not_initialized"}
 
@@ -264,7 +264,7 @@ async def _startup_checks() -> None:
             "monitoring": {"ok": True},
             "roles": {},
         }
-    logger.info("Kinesis startup capability report: %s", STARTUP_REPORT)
+    logger.info("SynAegis startup capability report: %s", STARTUP_REPORT)
 
 
 def _event_to_ws_payloads(event: Any) -> list[dict[str, Any]]:
@@ -298,7 +298,7 @@ def _event_to_ws_payloads(event: Any) -> list[dict[str, Any]]:
     return payloads
 
 
-class KinesisSession:
+class SynAegisSession:
     def __init__(self, websocket: WebSocket):
         self.ws = websocket
         self.user_id = f"user-{uuid.uuid4()}"
@@ -344,7 +344,7 @@ class KinesisSession:
     async def start(self) -> None:
         # Pre-create session in ADK's session service so run_live can find it
         await SESSION_SERVICE.create_session(
-            app_name="kinesis",
+            app_name="SynAegis",
             user_id=self.user_id,
             session_id=self.session_id,
         )
@@ -422,10 +422,10 @@ async def role_health_check() -> dict[str, Any]:
     return system_health_check()
 
 
-@app.websocket("/ws/kinesis")
-async def ws_kinesis(websocket: WebSocket) -> None:
+@app.websocket("/ws/SynAegis")
+async def ws_SynAegis(websocket: WebSocket) -> None:
     await websocket.accept()
-    session = KinesisSession(websocket)
+    session = SynAegisSession(websocket)
 
     try:
         await session.start()
@@ -546,9 +546,9 @@ async def ws_kinesis(websocket: WebSocket) -> None:
                 continue
 
     except WebSocketDisconnect:
-        logger.info("kinesis websocket disconnected: %s", session.session_id)
+        logger.info("SynAegis websocket disconnected: %s", session.session_id)
     except Exception as exc:
-        logger.exception("ws_kinesis error: %s", exc)
+        logger.exception("ws_SynAegis error: %s", exc)
         try:
             await websocket.send_json({"type": "error", "message": str(exc)})
         except Exception:
@@ -559,4 +559,4 @@ async def ws_kinesis(websocket: WebSocket) -> None:
 
 @app.websocket("/ws/live")
 async def ws_live_alias(websocket: WebSocket) -> None:
-    await ws_kinesis(websocket)
+    await ws_SynAegis(websocket)

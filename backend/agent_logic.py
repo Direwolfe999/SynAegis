@@ -4,7 +4,7 @@ from typing import Any
 
 from google.genai import types
 
-from backend.main import KINESIS_SYSTEM_INSTRUCTION as SYSTEM_INSTRUCTION
+from backend.main import SynAegis_SYSTEM_INSTRUCTION as SYSTEM_INSTRUCTION
 from backend.tools import self_upgrade_protocol
 from backend.tools import system_health_check
 
