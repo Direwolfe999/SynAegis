@@ -11,3 +11,7 @@ google-auth==2.38.0
 python-gitlab==4.4.0
 anthropic==0.21.3
 psutil
+bcrypt
+python-dotenv
+httpx
+requests
