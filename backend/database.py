@@ -85,3 +85,16 @@ def init_db():
     conn.close()
 
 init_db()
+
+# Ensure onboarding_completed column exists
+def apply_migrations():
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("ALTER TABLE users ADD COLUMN onboarding_completed INTEGER DEFAULT 0")
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass # Column already exists
+    conn.close()
+
+apply_migrations()

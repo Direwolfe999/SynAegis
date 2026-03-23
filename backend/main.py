@@ -249,6 +249,9 @@ async def startup_event():
     logger = logging.getLogger("synaegis.main")
     logger.info("Initializing SynAegis Auto-Action Engine...")
     action_engine.start()
+    
+    from backend.services.security_service import security_state
+    asyncio.create_task(security_state.update_loop())
 
 @app.on_event("shutdown")
 async def shutdown_event():
@@ -272,6 +275,16 @@ async def websocket_pipeline(websocket: WebSocket):
     except WebSocketDisconnect:
         manager.disconnect(websocket, "pipeline")
 
+@app.websocket("/ws/security")
+async def websocket_security(websocket: WebSocket):
+    await manager.connect(websocket, "security")
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        manager.disconnect(websocket, "security")
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -280,13 +293,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from backend.routers import dashboard, pipeline, settings, cloud, security, green
+from backend.routers import dashboard, pipeline, settings, cloud, security, green, onboarding
 app.include_router(dashboard.router, prefix="/api")
 app.include_router(pipeline.router, prefix="/api")
 app.include_router(settings.router, prefix="/api")
 app.include_router(cloud.router, prefix="/api")
 app.include_router(security.router, prefix="/api")
 app.include_router(green.router, prefix="/api")
+app.include_router(onboarding.router, prefix="/api")
 
 
 PROJECT_ID = _project_id()

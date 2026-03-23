@@ -49,52 +49,52 @@ export default function GlobalCommandDashboard({ setActiveView }: { setActiveVie
 
 
   useEffect(() => {
-        let ws: WebSocket;
-        let reconnectTimer: NodeJS.Timeout;
+    let ws: WebSocket;
+    let reconnectTimer: NodeJS.Timeout;
 
-        const connect = () => {
-            ws = new WebSocket('ws://localhost:8080/ws/dashboard');
-            
-            ws.onmessage = (event) => {
-                const updatedData = JSON.parse(event.data);
-                setData(updatedData);
-                setLoading(false);
-                
-                // Simulate appending to history for charts based on live data
-                setCloudHist(prev => [...prev.slice(-9), { time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }), cpu_usage: Number(updatedData.cloud.cpu_usage) || 0, memory_usage: Number(updatedData.cloud.memory_usage) || 0 }]);
-                setSecHist(prev => [...prev.slice(-9), { time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }), threats: Number(updatedData.security.threats) || 0 }]);
-            };
+    const connect = () => {
+      ws = new WebSocket('ws://localhost:8080/ws/dashboard');
 
-            ws.onclose = () => {
-                reconnectTimer = setTimeout(connect, 3000);
-            };
-        };
+      ws.onmessage = (event) => {
+        const updatedData = JSON.parse(event.data);
+        setData(updatedData);
+        setLoading(false);
 
-        const initialFetch = async () => {
-            try {
-                const [dash, cHist, sHist] = await Promise.all([
-                   fetchFullDashboard(),
-                   fetchCloudHistory(),
-                   fetchSecurityHistory()
-                ]);
-                if (dash) setData(dash);
-                if (cHist) setCloudHist(cHist);
-                if (sHist) setSecHist(sHist);
-                setLoading(false);
-                connect();
-            } catch (e) {
-                console.error("Fetch err:", e);
-                connect();
-            }
-        };
+        // Simulate appending to history for charts based on live data
+        setCloudHist(prev => [...prev.slice(-9), { time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }), cpu_usage: Number(updatedData.cloud.cpu_usage) || 0, memory_usage: Number(updatedData.cloud.memory_usage) || 0 }]);
+        setSecHist(prev => [...prev.slice(-9), { time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }), threats: Number(updatedData.security.threats) || 0 }]);
+      };
 
-        initialFetch();
+      ws.onclose = () => {
+        reconnectTimer = setTimeout(connect, 3000);
+      };
+    };
 
-        return () => {
-            if (ws) ws.close();
-            clearTimeout(reconnectTimer);
-        };
-    }, []);
+    const initialFetch = async () => {
+      try {
+        const [dash, cHist, sHist] = await Promise.all([
+          fetchFullDashboard(),
+          fetchCloudHistory(),
+          fetchSecurityHistory()
+        ]);
+        if (dash) setData(dash);
+        if (cHist) setCloudHist(cHist);
+        if (sHist) setSecHist(sHist);
+        setLoading(false);
+        connect();
+      } catch (e) {
+        console.error("Fetch err:", e);
+        connect();
+      }
+    };
+
+    initialFetch();
+
+    return () => {
+      if (ws) ws.close();
+      clearTimeout(reconnectTimer);
+    };
+  }, []);
 
 
   return (
@@ -152,9 +152,9 @@ export default function GlobalCommandDashboard({ setActiveView }: { setActiveVie
               </div>
             </div>
 
-            <div className="h-64 mt-4 w-full">
+            <div className="h-64 mt-4 w-full" style={{ minHeight: '256px' }}>
               {cloudHist.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height={256}>
                   <AreaChart data={cloudHist}>
                     <defs>
                       <linearGradient id="colorCpu" x1="0" y1="0" x2="0" y2="1">
@@ -189,9 +189,9 @@ export default function GlobalCommandDashboard({ setActiveView }: { setActiveVie
                   <Shield className="text-red-400" size={16} /> Security Vectors
                 </h3>
               </div>
-              <div className="h-40 mt-2">
+              <div className="h-40 mt-2" style={{ minHeight: '160px' }}>
                 {secHist.length > 0 ? (
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height={160}>
                     <BarChart data={secHist}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
                       <XAxis dataKey="timestamp" stroke="#ffffff50" fontSize={10} tickFormatter={(t) => t?.toString()?.split('T')[1]?.substring(0, 5) || t} />

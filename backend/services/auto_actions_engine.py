@@ -25,14 +25,21 @@ class AutoActionEngine:
             self.task.cancel()
 
     async def _loop(self):
+        loop_counter = 0
+        pipelines_cache = {"running": 0, "total": 0}
         while self.running:
             try:
-                await asyncio.sleep(3) # check every 3 seconds
+                await asyncio.sleep(5) # wait 5 seconds per tick
+                loop_counter += 1
                 
                 # Fetch state
                 cloud = await cloud_overview()
                 security = await security_overview()
-                pipelines = await get_pipeline_stats()
+                
+                # Only hit external gitlab API every 6th tick (~30s) to avoid rate limits
+                if loop_counter % 6 == 1 or loop_counter == 1:
+                    pipelines_cache = await get_pipeline_stats()
+                pipelines = pipelines_cache
                 
                 # Check Triggers
                 events = []

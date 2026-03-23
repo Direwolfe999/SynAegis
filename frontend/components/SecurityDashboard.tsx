@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+
+import { API_BASE } from "../lib/api";
 import { useToast } from "./ToastProvider";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -31,6 +33,50 @@ const MOCK_LOGS = [
     "[10:50:11] 🛑 Rate limit exceeded for API key ending in '...a7f2'",
 ];
 
+
+function AnimatedNumber({ value }: { value: number }) {
+    const [display, setDisplay] = useState(value);
+    
+    useEffect(() => {
+        let start = display;
+        if (start === value) return;
+        
+        const duration = 500;
+        let startTime = performance.now();
+        
+        const animate = (time: number) => {
+            const progress = Math.min((time - startTime) / duration, 1);
+            setDisplay(Math.floor(start + (value - start) * progress));
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            }
+        };
+        requestAnimationFrame(animate);
+    }, [value]);
+    
+    return <>{display.toLocaleString()}</>;
+}
+
+function getColorClass(type: string, value: number, darkMode: boolean) {
+    if (type === 'score') {
+        if (value >= 80) return darkMode ? 'text-emerald-500' : 'text-emerald-600';
+        if (value >= 50) return darkMode ? 'text-yellow-500' : 'text-yellow-600';
+        return darkMode ? 'text-red-500' : 'text-red-600';
+    }
+    if (type === 'vulns') {
+        if (value === 0) return darkMode ? 'text-emerald-500' : 'text-emerald-600';
+        if (value < 10) return darkMode ? 'text-yellow-500' : 'text-yellow-600';
+        return darkMode ? 'text-red-500' : 'text-red-600';
+    }
+    if (type === 'incidents') {
+        if (value === 0) return darkMode ? 'text-emerald-500' : 'text-emerald-600';
+        if (value < 2) return darkMode ? 'text-yellow-500' : 'text-yellow-600';
+        return darkMode ? 'text-red-500' : 'text-red-600';
+    }
+    // threats
+    return darkMode ? 'text-red-500' : 'text-red-600';
+}
+
 export default function SecurityDashboard({ onBack }: { onBack: () => void }) {
     const { addToast, showModal } = useToast();
     const [darkMode, setDarkMode] = useState(true);
@@ -42,6 +88,40 @@ export default function SecurityDashboard({ onBack }: { onBack: () => void }) {
     const [scanProgress, setScanProgress] = useState(0);
     const [searchQuery, setSearchQuery] = useState("");
     const [activeAction, setActiveAction] = useState<string | null>(null);
+
+    const [metrics, setMetrics] = useState({
+        total_threats: 1248,
+        active_incidents: 3,
+        vulnerabilities: 14,
+        security_score: 82
+    });
+
+    useEffect(() => {
+        let isMounted = true;
+        fetch(`${API_BASE}/security/metrics`).then(r => r.json()).then(data => {
+            if (isMounted && data) setMetrics(data);
+        }).catch(err => console.error("Metrics fetch error:", err));
+
+        const wsHost = API_BASE.replace("http://", "").replace("https://", "").replace("/api", "");
+        const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+        const wsUrl = `${protocol}//${wsHost}/ws/security`;
+        
+        const ws = new WebSocket(wsUrl);
+        ws.onmessage = (event) => {
+            try {
+                const payload = JSON.parse(event.data);
+                if (payload.type === 'metrics_update' && isMounted) {
+                    setMetrics(payload.data);
+                }
+            } catch(e) {}
+        };
+        
+        return () => {
+            isMounted = false;
+            ws.close();
+        };
+    }, []);
+
 
     // Simulate logs stream
     useEffect(() => {
@@ -125,25 +205,25 @@ export default function SecurityDashboard({ onBack }: { onBack: () => void }) {
                     <div className={`px-6 py-4 rounded-2xl border flex flex-col justify-center relative overflow-hidden ${darkMode ? "bg-red-950/20 border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.1)]" : "bg-red-50 border-red-200 shadow-sm"}`}>
                         <div className="absolute -right-4 -top-4 w-16 h-16 bg-red-500/10 rounded-full blur-xl"></div>
                         <span className="text-xs text-red-500 uppercase tracking-wider font-bold mb-1 flex items-center gap-1.5"><ShieldAlert className="w-3.5 h-3.5" /> Total Threats Today</span>
-                        <div className="text-3xl font-light text-red-500 mt-1">1,248</div>
+                        <div className={`text-3xl font-light mt-1 ${getColorClass('threats', metrics.total_threats, darkMode)}`}><AnimatedNumber value={metrics.total_threats} /></div>
                     </div>
 
                     <div className={`px-6 py-4 rounded-2xl border flex flex-col justify-center relative overflow-hidden ${darkMode ? "bg-orange-950/20 border-orange-500/20" : "bg-orange-50 border-orange-200 shadow-sm"}`}>
                         <div className="absolute -right-4 -top-4 w-16 h-16 bg-orange-500/10 rounded-full blur-xl"></div>
                         <span className="text-xs text-orange-500 uppercase tracking-wider font-bold mb-1 flex items-center gap-1.5"><AlertTriangle className="w-3.5 h-3.5" /> Active Incidents</span>
-                        <div className="text-3xl font-light text-orange-500 mt-1">3</div>
+                        <div className={`text-3xl font-light mt-1 ${getColorClass('incidents', metrics.active_incidents, darkMode)}`}><AnimatedNumber value={metrics.active_incidents} /></div>
                     </div>
 
                     <div className={`px-6 py-4 rounded-2xl border flex flex-col justify-center relative overflow-hidden ${darkMode ? "bg-amber-950/20 border-amber-500/20" : "bg-amber-50 border-amber-200 shadow-sm"}`}>
                         <div className="absolute -right-4 -top-4 w-16 h-16 bg-amber-500/10 rounded-full blur-xl"></div>
                         <span className="text-xs text-amber-500 uppercase tracking-wider font-bold mb-1 flex items-center gap-1.5"><Fingerprint className="w-3.5 h-3.5" /> Vulnerabilities</span>
-                        <div className="text-3xl font-light text-amber-500 mt-1">14</div>
+                        <div className={`text-3xl font-light mt-1 ${getColorClass('vulns', metrics.vulnerabilities, darkMode)}`}><AnimatedNumber value={metrics.vulnerabilities} /></div>
                     </div>
 
                     <div className={`px-6 py-4 rounded-2xl border flex flex-col justify-center relative overflow-hidden ${darkMode ? "bg-emerald-950/20 border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.05)]" : "bg-emerald-50 border-emerald-200 shadow-sm"}`}>
                         <div className="absolute -right-4 -top-4 w-16 h-16 bg-emerald-500/10 rounded-full blur-xl"></div>
                         <span className="text-xs text-emerald-500 uppercase tracking-wider font-bold mb-1 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5" /> Security Score</span>
-                        <div className="text-3xl font-light text-emerald-500 mt-1">82<span className="text-sm border-emerald-500">/100</span></div>
+                        <div className={`text-3xl font-light mt-1 ${getColorClass('score', metrics.security_score, darkMode)}`}><AnimatedNumber value={metrics.security_score} /><span className="text-sm opacity-50">/100</span></div>
                     </div>
                 </div>
 

@@ -372,3 +372,4 @@ export default function SynAegisOrb({ state, userLevel, aiLevel, rippling = fals
         </div>
     );
 }
+

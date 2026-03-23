@@ -50,6 +50,20 @@ export async function fetchPipelines() {
     }
 }
 
+export async function triggerPipeline() {
+    const res = await fetch(`${API_BASE}/pipeline/trigger?project_id=main`, { method: 'POST' });
+    return res.json();
+}
+
+export async function applyPatch(pipelineId: string, failureLog: string, repo: string, branch: string) {
+    const res = await fetch(`${API_BASE}/pipeline/apply-patch`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pipeline_id: pipelineId, failure_log: failureLog, repo, branch })
+    });
+    return res.json();
+}
+
 export async function cancelPipeline(pipelineId: string) {
     const res = await fetch(`${API_BASE}/pipeline/cancel?pipeline_id=${pipelineId}`, { method: 'POST' });
     return res.json();
@@ -190,6 +204,42 @@ export async function reapGreenZombies(idleDays: number = 7) {
         return await res.json();
     } catch (e) {
         console.error("Fetch err reapGreenZombies", e);
+        return null;
+    }
+}
+
+export async function fetchOnboardingStatus() {
+    try {
+        const res = await fetch(`${API_BASE}/onboarding/status`);
+        if (!res.ok) return { completed: false };
+        return await res.json();
+    } catch (e) {
+        console.error("Fetch err fetchOnboardingStatus", e);
+        return { completed: false };
+    }
+}
+
+export async function completeOnboarding() {
+    try {
+        const res = await fetch(`${API_BASE}/onboarding/complete`, { method: 'POST' });
+        if (!res.ok) return { status: 'error' };
+        return await res.json();
+    } catch (e) {
+        console.error("Fetch err completeOnboarding", e);
+        return { status: 'error' };
+    }
+}
+
+export async function resolveSimulation(status: string) {
+    try {
+        const res = await fetch(`${API_BASE}/pipeline/resolve-simulations`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status })
+        });
+        return await res.json();
+    } catch (error) {
+        console.error(error);
         return null;
     }
 }
