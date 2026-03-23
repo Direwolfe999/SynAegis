@@ -678,3 +678,8 @@ async def ws_SynAegis_alias(websocket: WebSocket) -> None:
 @app.websocket("/ws/live")
 async def ws_live_alias(websocket: WebSocket) -> None:
     await ws_warroom(websocket)
+
+@app.head("/")
+@app.get("/")
+async def root():
+    return {"message": "SynAegis API is running"}
