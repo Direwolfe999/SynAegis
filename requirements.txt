@@ -31,3 +31,4 @@ psutil>=5.9.0
 bcrypt
 httpx
 requests
+email-validator
