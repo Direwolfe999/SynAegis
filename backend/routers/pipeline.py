@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from fastapi import Request
 from backend.services.websocket_manager import manager
-from backend.services.gitlab_service import get_all_pipelines, apply_pipeline_patch, trigger_pipeline as s_trigger_pipeline, cancel_pipeline_run, get_pipeline_logs, resolve_simulated_pipelines
+from backend.services.gitlab_service import get_all_pipelines, apply_pipeline_patch, trigger_pipeline as s_trigger_pipeline, cancel_pipeline_run, get_pipeline_logs
                                                                              
 router = APIRouter()
 
