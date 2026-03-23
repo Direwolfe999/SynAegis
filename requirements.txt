@@ -27,3 +27,4 @@ flake8>=6.1.0               # Linter
 # Optional: Cloud Deployment
 # google-cloud-run>=0.10.0  # For Cloud Run deployment
 # google-cloud-logging>=3.5.0  # For structured logging
+psutil>=5.9.0

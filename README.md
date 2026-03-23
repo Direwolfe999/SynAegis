@@ -123,9 +123,9 @@ GITLAB_PROJECT_ID=80461731
 ```
 
 **4. Run the Backend Server**
-Open a terminal and start the Uvicorn server:
+Open a terminal, navigate to the backend folder (cd backend) and start the Uvicorn server:
 ```bash
-python -m uvicorn backend.main:app --host 0.0.0.0 --port 8080
+python -m uvicorn main:app --host 0.0.0.0 --port 8080
 ```
 
 **5. Setup and Run the Frontend**
@@ -186,6 +186,40 @@ SynAegis/
 ├── deployment/               # CloudRun / K8s manifests
 ├── docker-compose.yml        # Orchestration configurations
 └── README.md                 # Project Documentation
+```
+
+---
+
+Project Summary Diagram
+
+```text
+ ┌────────────────────────────────────────────────────────┐
+ │                      FRONTEND (Next.js)                │
+ │                                                        │
+ │ ┌────────────┐   ┌────────────┐   ┌────────────┐       │
+ │ │  Sidebar   │   │  Settings  │   │   Modals   │       │
+ │ └────────────┘   └──────┬─────┘   └──────┬─────┘       │
+ │                         │                │             │
+ │ ┌────────────┐   ┌──────▼─────┐   ┌──────▼─────┐       │
+ │ │ CICD / Web │   │ Global Dash│   │ Live Agent │       │
+ │ └─────┬──────┘   └──────┬─────┘   └──────┬─────┘       │
+ └───────│─────────────────│────────────────│─────────────┘
+         │ (REST)          │ (WS Telemetry) │ (WS Audio)
+ ┌───────▼─────────────────▼────────────────▼─────────────┐
+ │                      BACKEND (FastAPI)                 │
+ │                                                        │
+ │ ┌────────────┐   ┌────────────┐   ┌────────────┐       │
+ │ │ Router API │   │ Metrics Gen│   │ Agent Relay│ <─────┐
+ │ └────────────┘   └──────┬─────┘   └──────┬─────┘       │
+ │                         │                │             │
+ │ ┌────────────┐   ┌──────▼─────┐   ┌──────▼─────┐       │
+ │ │ DB / Config│   │ Green Tools│   │GitLab Tools│       │
+ │ └────────────┘   └────────────┘   └────────────┘       │
+ └────────────────────────────────────────────────────────┘
+                                            │ (gRPC / HTTP)
+                                     ┌──────▼─────┐
+                                     │ Gemini API │
+                                     └────────────┘
 ```
 
 ---
