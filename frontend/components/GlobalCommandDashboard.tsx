@@ -62,7 +62,7 @@ export default function GlobalCommandDashboard({ setActiveView }: { setActiveVie
 
         // Simulate appending to history for charts based on live data
         setCloudHist(prev => [...prev.slice(-9), { time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }), cpu_usage: Number(updatedData.cloud.cpu_usage) || 0, memory_usage: Number(updatedData.cloud.memory_usage) || 0 }]);
-        setSecHist(prev => [...prev.slice(-9), { time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }), threats: Number(updatedData.security.threats) || 0 }]);
+        setSecHist(prev => [...prev.slice(-9), { time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }), timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }), threats: Number(updatedData.security.threats) || 0, vulnerabilities: Number(updatedData.security.vulnerabilities) || 0 }]);
       };
 
       ws.onclose = () => {

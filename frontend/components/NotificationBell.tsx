@@ -3,7 +3,7 @@ import { Bell, ShieldAlert, CheckCircle, Info, Activity } from "lucide-react";
 import { useToast } from "./ToastProvider";
 import { API_BASE } from "../lib/api";
 
-export function NotificationBell({ darkMode }: { darkMode?: boolean }) {
+export function NotificationBell({ darkMode, onClick }: { darkMode?: boolean; onClick?: () => void }) {
     const [notifications, setNotifications] = useState<any[]>([]);
     const [isOpen, setIsOpen] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
@@ -97,10 +97,11 @@ export function NotificationBell({ darkMode }: { darkMode?: boolean }) {
         <div className="relative" ref={dropdownRef}>
             <button 
                 onClick={() => {
-                    setIsOpen(!isOpen);
-                    if (!isOpen && unreadCount > 0) markAsRead();
+                    markAsRead();
+                    if (onClick) onClick();
+                    else setIsOpen(!isOpen);
                 }}
-                className={`relative p-2 rounded-full transition-all ${darkMode ? "hover:bg-slate-500/10" : "hover:bg-slate-100"}`}
+                className={`relative p-2 rounded-full transition-all ${darkMode ? "hover:bg-slate-500/10" : "hover:bg-slate-200"}`}
             >
                 <Bell className={`w-5 h-5 ${bellColorClass} transition-colors`} />
                 {unreadCount > 0 && (

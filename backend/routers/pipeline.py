@@ -109,7 +109,7 @@ async def trigger_ai_code_review(merge_request_id: int, project_id: int, source_
         note_url = f"{GITLAB_URL}/projects/{project_id}/merge_requests/{merge_request_id}/notes"
         await client.post(note_url, headers=_get_headers(), json={"body": ai_comment})
 
-@router.post("/{pipeline_id}/{action}")
+@router.post("/pipeline/{pipeline_id}/{action}")
 async def pipeline_action(pipeline_id: str, action: str):
     import asyncio
     # Mock real action implementation for prod feel

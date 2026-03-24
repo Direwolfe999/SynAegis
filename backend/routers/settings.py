@@ -12,7 +12,7 @@ from backend.schemas.settings_schema import (
     PreferenceUpdate, IntegrationUpdate, IntegrationResponse
 )
 
-router = APIRouter(prefix="/api/settings", tags=["settings"])
+router = APIRouter(prefix="/settings", tags=["settings"])
 
 def get_current_user_id():
     return "MOCK_USER_ID" # Hardcode for auth simplicity

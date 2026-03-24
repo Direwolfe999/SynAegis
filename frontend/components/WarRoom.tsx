@@ -305,6 +305,16 @@ export default function WarRoom() {
             }
 
             mediaRef.current = stream;
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+                // Add a small delay for video element to mount if needed
+                setTimeout(() => {
+                    if (videoRef.current && stream.getVideoTracks().length > 0) {
+                        videoRef.current.srcObject = stream;
+                        videoRef.current.play().catch(e => console.warn("Video autoplacy blocked: ", e));
+                    }
+                }, 500);
+            }
             setCameraActive(true);
 
             const audioCtx = new AudioContext({ sampleRate: 16000 });
@@ -853,7 +863,7 @@ export default function WarRoom() {
                                     exit={{ opacity: 0, y: 6 }}
                                     className="pointer-events-none absolute bottom-[100px] md:bottom-28 left-1/2 z-[60] -translate-x-1/2 whitespace-nowrap rounded-full border border-cyan-500/30 bg-cyan-900/30 shadow-[0_0_15px_rgba(6,182,212,0.2)] px-4 py-2 text-[10px] uppercase tracking-[0.15em] text-cyan-100 backdrop-blur-md animate-pulse sm:px-5 sm:py-2.5 sm:text-xs sm:tracking-[0.2em]"
                                 >
-                                    {orbState === "idle" ? "Tap anywhere to Initialize Mic/Camera" : "Tap to Barge-In · Press X to Halt"}
+                                    {orbState === "idle" ? "Click to Initialize Mic/Camera" : "Tap to Barge-In · Press X to Halt"}
                                 </motion.div>
                             )}
                         </AnimatePresence>

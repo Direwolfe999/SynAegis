@@ -135,7 +135,7 @@ export default function CICDDashboard({ onBack }: { onBack: () => void }) {
     };
 
     return (
-        <div className={`min-h-screen w-full flex flex-col font-sans transition-colors duration-300 ${darkMode ? "bg-[#050505] text-slate-200" : "bg-slate-50 text-slate-900"}`}>
+        <div className={`min-h-screen w-full flex flex-col font-sans transition-all duration-500 ease-in-out ${darkMode ? "bg-[#050505] text-slate-200" : "bg-slate-50 text-black font-medium"}`}>
             <header className={`sticky top-0 z-50 px-6 py-4 border-b flex items-center justify-between backdrop-blur-md ${darkMode ? "border-white/10 bg-[#050505]/80" : "border-slate-200 bg-white/80"}`}>
                 <div className="flex items-center gap-6">
                     <div className="flex items-center gap-2">
@@ -147,14 +147,11 @@ export default function CICDDashboard({ onBack }: { onBack: () => void }) {
                     <nav className="flex items-center gap-2 text-sm font-medium text-slate-500">
                         <button onClick={onBack} className="hover:text-cyan-400 transition-colors">Workspace</button>
                         <span>/</span>
-                        <span className={darkMode ? "text-slate-200" : "text-slate-900"}>CI/CD Pipeline</span>
+                        <span className={darkMode ? "text-slate-200" : "text-black"}>CI/CD Pipeline</span>
                     </nav>
                 </div>
                 <div className="flex items-center gap-4">
-                    <button className="p-2 rounded-full hover:bg-slate-500/10 transition-colors relative">
-                        <Bell className="w-5 h-5" />
-                        <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-cyan-500 animate-pulse"></span>
-                    </button>
+                    <NotificationBell darkMode={darkMode} />
                     <button onClick={() => setDarkMode(!darkMode)} className="p-2 rounded-full hover:bg-slate-500/10 transition-colors">
                         {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                     </button>
@@ -249,7 +246,7 @@ export default function CICDDashboard({ onBack }: { onBack: () => void }) {
                                             <div className="flex items-center gap-6 flex-1">
                                                 <div className={`font-mono text-xs ${darkMode ? "text-slate-400" : "text-slate-600 font-semibold"}`}>{pipe.commit || pipe.ref || "HEAD"}</div>
                                                 <StatusBadge status={pipe.status} />
-                                                <div className={`font-medium text-sm hidden md:block ${darkMode ? "text-slate-400" : "text-slate-600"}`}>{pipe.duration || "N/A"}</div>
+                                                <div className={`font-medium text-sm hidden md:block ${darkMode ? "text-slate-400" : "text-slate-900 font-medium"}`}>{pipe.duration || "N/A"}</div>
                                             </div>
                                         </div>
 
@@ -314,7 +311,7 @@ export default function CICDDashboard({ onBack }: { onBack: () => void }) {
                                 <h2 className="text-lg font-medium flex items-center gap-2 text-cyan-500">
                                     <Sparkles className="w-5 h-5" /> AI Pipeline Optimizations
                                 </h2>
-                                {aiOpen ? <ChevronUp className={`w-5 h-5 ${darkMode ? "text-slate-400" : "text-slate-600"}`} /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
+                                {aiOpen ? <ChevronUp className={`w-5 h-5 ${darkMode ? "text-slate-400" : "text-slate-900 font-medium"}`} /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
                             </div>
                             <AnimatePresence>
                                 {aiOpen && (
@@ -396,7 +393,7 @@ export default function CICDDashboard({ onBack }: { onBack: () => void }) {
                                                             <div className="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg"><Bot className="w-6 h-6" /></div>
                                                             <div>
                                                                 <div className={`text-sm ${darkMode ? "text-slate-400" : "text-slate-500"}`}>Root Cause Identified</div>
-                                                                <div className={`font-medium text-lg ${darkMode ? "text-white" : "text-slate-800"}`}>Cache Miss / Dependency Conflict</div>
+                                                                <div className={`font-medium text-lg ${darkMode ? "text-white" : "text-black"}`}>Cache Miss / Dependency Conflict</div>
                                                             </div>
                                                         </div>
                                                         <div className="sm:text-right">
@@ -406,7 +403,7 @@ export default function CICDDashboard({ onBack }: { onBack: () => void }) {
                                                     </div>
 
                                                     <div className="space-y-2">
-                                                        <h4 className={`font-medium mb-1 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${darkMode ? "text-white" : "text-slate-800"}`}>
+                                                        <h4 className={`font-medium mb-1 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${darkMode ? "text-white" : "text-black"}`}>
                                                             <span>Proposed Fix Context</span>
                                                             <span className="text-xs px-2 py-0.5 bg-cyan-500/20 text-cyan-400 rounded border border-cyan-500/30 w-fit">Auto-Apply Recommended</span>
                                                         </h4>
@@ -416,7 +413,7 @@ export default function CICDDashboard({ onBack }: { onBack: () => void }) {
                                                     </div>
 
                                                     <div className={`p-4 rounded-xl border ${darkMode ? "bg-black/40 border-white/5" : "bg-slate-50 border-slate-200"}`}>
-                                                        <h4 className={`font-medium mb-2 text-sm ${darkMode ? "text-white" : "text-slate-800"}`}>Code Diff Generated</h4>
+                                                        <h4 className={`font-medium mb-2 text-sm ${darkMode ? "text-white" : "text-black"}`}>Code Diff Generated</h4>
                                                         <pre className="text-xs font-mono p-3 rounded-lg bg-[#0d1117] text-slate-300 overflow-x-auto border border-white/10 shadow-inner">
                                                             <code className="text-red-400">- RUN npm install</code><br />
                                                             <code className="text-emerald-400">+ RUN npm ci --omit=dev --legacy-peer-deps</code><br />
@@ -458,7 +455,7 @@ export default function CICDDashboard({ onBack }: { onBack: () => void }) {
                                                         <div className="absolute inset-0 flex items-center justify-center"><GitBranch className="w-6 h-6 text-cyan-400 animate-pulse" /></div>
                                                     </div>
                                                     <div className="text-center space-y-2">
-                                                        <h4 className={`text-lg font-medium ${darkMode ? "text-white" : "text-slate-800"}`}>Executing GitOps Sequence</h4>
+                                                        <h4 className={`text-lg font-medium ${darkMode ? "text-white" : "text-black"}`}>Executing GitOps Sequence</h4>
                                                         <div className="text-sm text-slate-400 h-6 overflow-hidden relative w-64 mx-auto border border-white/5 bg-black/20 rounded-md">
                                                             <motion.div animate={{ y: [0, -24, -48, -72, -72] }} transition={{ duration: 3.5, times: [0, 0.25, 0.5, 0.8, 1], ease: "easeInOut" }} className="flex flex-col space-y-0 text-center">
                                                                 <span className="h-6 leading-6">Creating fix branch...</span>
@@ -476,8 +473,8 @@ export default function CICDDashboard({ onBack }: { onBack: () => void }) {
                                                     <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mb-2 shadow-[0_0_15px_rgba(16,185,129,0.3)]">
                                                         <CheckCircle className="w-8 h-8" />
                                                     </div>
-                                                    <h4 className={`text-xl font-medium text-center ${darkMode ? "text-white" : "text-slate-800"}`}>Patch Successfully Deployed</h4>
-                                                    <p className={`text-center text-sm max-w-md ${darkMode ? "text-slate-400" : "text-slate-600"}`}>
+                                                    <h4 className={`text-xl font-medium text-center ${darkMode ? "text-white" : "text-black"}`}>Patch Successfully Deployed</h4>
+                                                    <p className={`text-center text-sm max-w-md ${darkMode ? "text-slate-400" : "text-slate-900 font-medium"}`}>
                                                         The AI infrastructure fix was committed to a new branch, manually reviewed, and a Merge Request has been seamlessly integrated.
                                                     </p>
                                                     <div className="flex flex-col sm:flex-row gap-4 mt-6 w-full sm:w-auto">

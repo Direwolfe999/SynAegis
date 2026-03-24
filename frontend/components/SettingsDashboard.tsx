@@ -104,7 +104,7 @@ export default function SettingsDashboard({ onBack }: { onBack: () => void }) {
   }
 
   return (
-    <div className={`w-full flex flex-col font-sans transition-colors duration-300 bg-transparent`}>
+    <div className={`w-full flex flex-col font-sans transition-all duration-500 ease-in-out bg-transparent`}>
       <header className={`sticky top-0 z-50 py-4 flex items-center justify-between border-b backdrop-blur-xl -mx-4 sm:-mx-6 lg:-mx-10 px-4 sm:px-6 lg:px-10 ${darkMode ? "border-white/10 bg-[#050505]/70" : "border-slate-200 bg-white/80"}`}>
         <div className="flex items-center gap-4 md:gap-6">
           <div className="flex items-center gap-2">
@@ -116,7 +116,7 @@ export default function SettingsDashboard({ onBack }: { onBack: () => void }) {
           <nav className="flex items-center gap-2 text-xs md:text-sm font-medium text-slate-500">
             <button onClick={onBack} className="hover:text-indigo-400 transition-colors">Workspace</button>
             <span>/</span>
-            <span className={darkMode ? "text-slate-200" : "text-slate-900"}>Settings</span>
+            <span className={darkMode ? "text-slate-200" : "text-black"}>Settings</span>
           </nav>
         </div>
         <div className="flex items-center gap-4">
@@ -159,7 +159,7 @@ export default function SettingsDashboard({ onBack }: { onBack: () => void }) {
         </aside>
 
         <main className="flex-1 min-w-0">
-          <div className={`p-4 md:p-8 rounded-2xl border shadow-sm transition-colors duration-300 ${darkMode ? "bg-[#0a0a0a] border-white/10 shadow-black/20" : "bg-white border-slate-200"}`}>
+          <div className={`p-4 md:p-8 rounded-2xl border shadow-sm transition-all duration-500 ease-in-out ${darkMode ? "bg-[#0a0a0a] border-white/10 shadow-black/20" : "bg-white border-slate-200"}`}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
@@ -210,7 +210,7 @@ export default function SettingsDashboard({ onBack }: { onBack: () => void }) {
 
 const InputField = ({ label, type = "text", placeholder, value, onChange, darkMode, icon }: any) => (
   <div className="space-y-1.5 w-full">
-    <label className={`text-sm font-medium ${darkMode ? "text-slate-300" : "text-slate-700"}`}>{label}</label>
+    <label className={`text-sm font-medium ${darkMode ? "text-slate-300" : "text-black font-semibold"}`}>{label}</label>
     <div className="relative">
       {icon && <div className={`absolute left-3 top-1/2 -translate-y-1/2 ${darkMode ? "text-slate-500" : "text-slate-400"}`}>{icon}</div>}
       <input
@@ -227,7 +227,7 @@ const InputField = ({ label, type = "text", placeholder, value, onChange, darkMo
 const ToggleSwitch = ({ label, description, checked, onChange, darkMode }: any) => (
   <div className="flex items-center justify-between py-3">
     <div className="flex-1 pr-6">
-      <p className={`text-sm font-medium ${darkMode ? "text-slate-200" : "text-slate-800"}`}>{label}</p>
+      <p className={`text-sm font-medium ${darkMode ? "text-slate-200" : "text-black"}`}>{label}</p>
       {description && <p className={`text-xs mt-1 ${darkMode ? "text-slate-500" : "text-slate-500"}`}>{description}</p>}
     </div>
     <button
@@ -261,7 +261,7 @@ const ProfileSettings = ({ darkMode, profile, setProfile, avatarPreview, setAvat
     <div className="flex flex-col sm:flex-row gap-6 md:gap-8 items-start">
       <div className="flex flex-col items-center gap-3">
         <div className={`w-20 h-20 md:w-24 md:h-24 rounded-full border-2 flex items-center justify-center relative group overflow-hidden ${darkMode ? "border-white/10 bg-white/5" : "border-slate-200 bg-slate-50"}`}>
-          {avatarPreview ? <img src={avatarPreview} className="w-full h-full object-cover" alt="Avatar" /> : <User className={`w-8 h-8 md:w-10 md:h-10 ${darkMode ? "text-slate-600" : "text-slate-300"}`} />}
+          {avatarPreview ? <img src={avatarPreview} className="w-full h-full object-cover" alt="Avatar" /> : <User className={`w-8 h-8 md:w-10 md:h-10 ${darkMode ? "text-slate-900 font-medium" : "text-slate-300"}`} />}
           <div onClick={() => fileInputRef.current?.click()} className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
             <Camera className="w-5 h-5 md:w-6 md:h-6 text-white" />
           </div>
@@ -290,7 +290,7 @@ const ProfileSettings = ({ darkMode, profile, setProfile, avatarPreview, setAvat
         </div>
         <InputField label="Email Address" type="email" icon={<Mail className="w-4 h-4" />} value={profile.email} onChange={(v: string) => setProfile({ ...profile, email: v })} darkMode={darkMode} />
         <div className="space-y-1.5">
-          <label className={`text-sm font-medium ${darkMode ? "text-slate-300" : "text-slate-700"}`}>Bio</label>
+          <label className={`text-sm font-medium ${darkMode ? "text-slate-300" : "text-black font-semibold"}`}>Bio</label>
           <textarea rows={3} value={profile.bio || ""} onChange={(e) => setProfile({ ...profile, bio: e.target.value })} className={`w-full px-4 py-2.5 rounded-xl border text-sm transition-colors outline-none resize-none ${darkMode ? "bg-black/50 border-white/10 text-white focus:border-indigo-500 focus:bg-white/5" : "bg-white border-slate-300 text-slate-900 focus:border-indigo-500"}`} placeholder="Tell us about yourself..." />
         </div>
       </div>
@@ -326,7 +326,7 @@ const SecuritySettings = ({ darkMode, addToast }: any) => {
         <p className={`text-sm ${darkMode ? "text-slate-400" : "text-slate-500"}`}>Manage your account access and credentials.</p>
       </div>
       <div className={`p-4 md:p-6 rounded-2xl border ${darkMode ? "border-white/10 bg-white/5" : "border-slate-200 bg-slate-50"}`}>
-        <h3 className={`text-sm font-semibold mb-4 flex items-center gap-2 ${darkMode ? "text-slate-200" : "text-slate-800"}`}>
+        <h3 className={`text-sm font-semibold mb-4 flex items-center gap-2 ${darkMode ? "text-slate-200" : "text-black"}`}>
           <Lock className="w-4 h-4" /> Change Password
         </h3>
         <div className="space-y-4 max-w-sm">
@@ -339,7 +339,7 @@ const SecuritySettings = ({ darkMode, addToast }: any) => {
       </div>
 
       <div className={`p-4 md:p-6 rounded-2xl border ${darkMode ? "border-white/10 bg-white/5" : "border-slate-200 bg-slate-50"}`}>
-        <h3 className={`text-sm font-semibold mb-1 flex items-center gap-2 ${darkMode ? "text-slate-200" : "text-slate-800"}`}>
+        <h3 className={`text-sm font-semibold mb-1 flex items-center gap-2 ${darkMode ? "text-slate-200" : "text-black"}`}>
           <Shield className="w-4 h-4" /> Multi-Factor Authentication (MFA)
         </h3>
         <p className={`text-xs mb-4 ${darkMode ? "text-slate-400" : "text-slate-500"}`}>Secure your account with an additional layer of defense.</p>
@@ -349,7 +349,7 @@ const SecuritySettings = ({ darkMode, addToast }: any) => {
                 <div className="flex items-center gap-3">
                     <Smartphone className={`w-5 h-5 ${darkMode ? "text-indigo-400" : "text-indigo-600"}`} />
                     <div>
-                        <p className={`text-sm font-medium ${darkMode ? "text-slate-200" : "text-slate-800"}`}>Authenticator App</p>
+                        <p className={`text-sm font-medium ${darkMode ? "text-slate-200" : "text-black"}`}>Authenticator App</p>
                         <p className={`text-xs ${darkMode ? "text-slate-400" : "text-slate-500"}`}>Use Google Authenticator or Authy</p>
                     </div>
                 </div>
@@ -359,7 +359,7 @@ const SecuritySettings = ({ darkMode, addToast }: any) => {
                 <div className="flex items-center gap-3">
                     <Mail className={`w-5 h-5 ${darkMode ? "text-indigo-400" : "text-indigo-600"}`} />
                     <div>
-                        <p className={`text-sm font-medium ${darkMode ? "text-slate-200" : "text-slate-800"}`}>Email OTP</p>
+                        <p className={`text-sm font-medium ${darkMode ? "text-slate-200" : "text-black"}`}>Email OTP</p>
                         <p className={`text-xs ${darkMode ? "text-slate-400" : "text-slate-500"}`}>Receive one-time passcodes via email</p>
                     </div>
                 </div>
@@ -380,9 +380,13 @@ const SecuritySettings = ({ darkMode, addToast }: any) => {
 };
 
 /* --- Integrations Settings --- */
+
+
 const IntegrationsSettings = ({ darkMode, showModal, addToast }: any) => {
   const [integrations, setIntegrations] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeProvider, setActiveProvider] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const fetchInts = async () => {
     try {
@@ -393,21 +397,10 @@ const IntegrationsSettings = ({ darkMode, showModal, addToast }: any) => {
   
   useEffect(() => { fetchInts(); }, []);
 
-  const handleAdd = async (provider: string) => {
-    // In a real app, this redirects to OAuth flow. Here we simulate.
-    try {
-      await addIntegration(provider, `token-${Date.now()}`);
-      addToast(`Successfully connected to ${provider}`, "success");
-      fetchInts();
-    } catch {
-      addToast(`Failed to connect to ${provider}`, "error");
-    }
-  };
-
   const confirmRemove = (provider: string) => {
     showModal({
       title: `Disconnect ${provider}?`,
-      description: `Disconneting ${provider} may impact automated workflows and break CI/CD telemetry.`,
+      description: `Disconnecting ${provider} may impact automated workflows and break CI/CD telemetry.`,
       riskLevel: "medium",
       impact: "Authentication tokens will be explicitly revoked from the backend store.",
       confirmText: "Yes, Disconnect",
@@ -424,35 +417,94 @@ const IntegrationsSettings = ({ darkMode, showModal, addToast }: any) => {
   };
 
   const isConnected = (p: string) => integrations.some(i => i.provider === p.toLowerCase());
-
+  
   const ProviderCard = ({ name, provider, desc, icon }: any) => (
     <div className={`p-4 md:p-5 rounded-2xl border flex flex-col justify-between transition-colors ${darkMode ? "border-white/10 bg-white/5 hover:bg-white/[0.07]" : "border-slate-200 bg-white hover:border-indigo-200"}`}>
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-start gap-4">
-          <div className={`p-2.5 rounded-xl ${darkMode ? "bg-white/5" : "bg-slate-50"}`}>
+          <div className={`p-2.5 rounded-xl ${darkMode ? "bg-[#1A1A1A] border border-white/5 shadow-inner" : "bg-white border border-slate-100 shadow-sm"}`}>
             {icon}
           </div>
           <div>
-            <p className={`font-semibold text-sm ${darkMode ? "text-slate-200" : "text-slate-800"}`}>{name}</p>
+            <p className={`font-semibold text-sm ${darkMode ? "text-slate-200" : "text-black"}`}>{name}</p>
             <p className={`text-xs mt-1 max-w-[200px] leading-relaxed ${darkMode ? "text-slate-400" : "text-slate-500"}`}>{desc}</p>
           </div>
         </div>
       </div>
-      <div className="flex items-center justify-between pt-2 border-t border-transparent" style={{ borderColor: darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}>
+      <div className="flex items-center justify-between pt-4 border-t border-transparent" style={{ borderColor: darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}>
         {isConnected(provider) ? (
           <>
-            <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-500"><Check className="w-4 h-4" /> Active</span>
-            <button onClick={() => confirmRemove(provider)} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${darkMode ? "text-red-400 hover:bg-red-400/10" : "text-red-600 hover:bg-red-50"}`}>Disconnect</button>
+            <span className="flex items-center gap-1.5 text-xs font-semibold text-emerald-500">
+              <Check className="w-4 h-4" /> Connected
+            </span>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => confirmRemove(provider)} 
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${darkMode ? "text-red-400 hover:bg-red-400/10" : "text-red-600 hover:bg-red-50"}`}
+                title="Disconnect"
+              >
+                Disconnect
+              </button>
+              <button 
+                disabled 
+                className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-not-allowed ${darkMode ? "bg-white/5 text-white/40" : "bg-slate-100 text-slate-400"}`}
+              >
+                Connect
+              </button>
+            </div>
           </>
         ) : (
           <>
             <span className={`text-xs font-medium ${darkMode ? "text-slate-500" : "text-slate-400"}`}>Not connected</span>
-            <button onClick={() => handleAdd(provider)} className="px-4 py-1.5 rounded-lg text-xs font-medium bg-indigo-600 text-white hover:bg-indigo-500 shadow-sm transition-colors">Connect</button>
+            <button 
+              onClick={() => { setActiveProvider(provider); setModalOpen(true); }} 
+              className="px-5 py-1.5 rounded-lg text-xs font-medium bg-indigo-600 text-white hover:bg-indigo-500 shadow-sm transition-colors"
+            >
+              Connect
+            </button>
           </>
         )}
       </div>
     </div>
   );
+
+  const icons = {
+    github: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className={darkMode ? "text-white" : "text-slate-900"}>
+        <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.699-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.379.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.416 22 12c0-5.523-4.477-10-10-10z"/>
+      </svg>
+    ),
+    gitlab: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M22.65 14.39L12 22.13 1.35 14.39a.84.84 0 0 1-.3-.94l1.22-3.78 2.44-7.51A.84.84 0 0 1 6.32 1.9c.47.05.85.42.92.89L9.69 10.3h4.63l2.45-7.51a.84.84 0 0 1 .91-.89c.48-.05.86.32.93.79l2.43 7.51 1.22 3.78c.15.5.02 1.04-.32 1.4z" fill="#E24329"/>
+      </svg>
+    ),
+    slack: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="text-[#E01E5A]">
+        <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.52H15.165z"/>
+      </svg>
+    ),
+    gemini: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" fill="url(#gemini-grad)"/>
+        <defs>
+          <linearGradient id="gemini-grad" x1="2" y1="2" x2="22" y2="22">
+            <stop stopColor="#4185f4"/><stop offset="1" stopColor="#ea4335"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    ),
+    aws: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="#FF9900">
+        <path d="M12.923 18.258c-1.341.344-2.813.529-4.22.529-1.921 0-3.69-.328-5.26-.94-.356-.129-.533-.081-.66.082-.016.035-1.52 2.115-1.545 2.155-.164.218-.112.433.09.529C3.197 21.6 6.35 22.5 9.774 22.5c2.474 0 5.23-.427 7.749-1.258.118-.035.155-.078.204-.216l.896-2.502c.045-.213.06-.328-.158-.458-.871-.52-1.905-.724-2.903-.724a6.621 6.621 0 0 0-2.639.529l-.001-.005.001-.008zm10.748-1.53c-.114-.15-.296-.289-.597-.33-4.32-.473-8.868-2.316-12.72-5.187C6.015 7.973 2.85 4.195.938 1.439c-.198-.288-.415-.365-.678-.36l-1.42.062c-.328.016-.48.202-.303.454a39.183 39.183 0 0 0 5.176 5.86 37.957 37.957 0 0 0 9.176 6.275c3.21 1.488 6.45 2.457 9.873 3.037.382.046.592.016.711-.19.041-.059.882-1.42.923-1.478.136-.202.041-.33-.046-.431h-.001.001v.001zm-5.467-2.66h.001V14.07h-.001c-.139 0-.251-.08-.284-.217z"/>
+      </svg>
+    ),
+    sentry: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className={darkMode ? "text-[#E01E5A]" : "text-[#362D59]"}>
+        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.12 17.532c-.173.344-.569.497-.93.363l-1.92-.663c-.156-.051-.318-.08-.475-.08-.755 0-1.4.385-1.787.973-.086.13-.23.216-.39.216s-.304-.085-.39-.216c-.387-.588-1.032-.973-1.787-.973-.157 0-.319.029-.475.08l-1.92.663c-.361.134-.757-.019-.93-.363-.16-.32-.016-.713.313-.889l1.83-1.077c.306-.188.5-.515.5-.863v-3.32h4.595v3.32c0 .348.194.675.5.863l1.83 1.077c.329.176.474.568.314.889zM12 6.002c-1.39 0-2.52 1.127-2.52 2.51v3.29h5.04V8.512c0-1.383-1.13-2.51-2.52-2.51z"/>
+      </svg>
+    )
+  };
 
   return (
     <div className="space-y-6 md:space-y-8">
@@ -464,19 +516,120 @@ const IntegrationsSettings = ({ darkMode, showModal, addToast }: any) => {
         <div className="animate-pulse flex gap-4"><div className="w-full h-32 bg-white/5 rounded-2xl"></div><div className="w-full h-32 bg-white/5 rounded-2xl hidden md:block"></div></div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <ProviderCard name="GitLab" provider="gitlab" desc="Sync CI/CD pipelines and PR patching." icon={<Globe className="w-6 h-6 text-[#E24329]" />} />
-          <ProviderCard name="Google Gemini" provider="gemini" desc="Enable advanced AI analysis and voice." icon={<span className="font-bold text-blue-500 text-xl font-serif">G</span>} />
-          <ProviderCard name="Slack" provider="slack" desc="Push critical error streams to channels." icon={<span className="font-bold text-[#4A154B] dark:text-[#E01E5A] text-xl font-serif">#</span>} />
-          <ProviderCard name="GitHub" provider="github" desc="Code scanning and repository triggers." icon={<span className="font-bold text-slate-800 dark:text-slate-200 text-xl font-serif">GH</span>} />
-          <ProviderCard name="AWS" provider="aws" desc="Cloud threat insights and EBS monitoring." icon={<span className="font-bold text-[#FF9900] text-xl font-serif">AWS</span>} />
-          <ProviderCard name="Sentry" provider="sentry" desc="Error stream aggregation and real-time capture." icon={<span className="font-bold text-[#362D59] dark:text-[#E01E5A] text-xl font-serif">S</span>} />
+          <ProviderCard name="GitLab" provider="gitlab" desc="Sync CI/CD pipelines and PR patching." icon={icons.gitlab} />
+          <ProviderCard name="Google Gemini" provider="gemini" desc="Enable advanced AI analysis and voice." icon={icons.gemini} />
+          <ProviderCard name="Slack" provider="slack" desc="Push critical error streams to channels." icon={icons.slack} />
+          <ProviderCard name="GitHub" provider="github" desc="Code scanning and repository triggers." icon={icons.github} />
+          <ProviderCard name="AWS" provider="aws" desc="Cloud threat insights and EBS monitoring." icon={icons.aws} />
+          <ProviderCard name="Sentry" provider="sentry" desc="Error stream aggregation and real-time capture." icon={icons.sentry} />
         </div>
       )}
+      <AnimatePresence>
+        {modalOpen && activeProvider && (
+           <IntegrationModal 
+              provider={activeProvider} 
+              darkMode={darkMode} 
+              onClose={() => { setModalOpen(false); setActiveProvider(null); }} 
+              onSuccess={() => { setModalOpen(false); setActiveProvider(null); fetchInts(); addToast(`Successfully connected to ${activeProvider}`, "success"); }}
+           />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
 
-/* --- API Keys Settings --- */
+const IntegrationModal = ({ provider, darkMode, onClose, onSuccess }: any) => {
+  const [step, setStep] = useState(0); 
+  const [apiKey, setApiKey] = useState("");
+  const [awsKeyId, setAwsKeyId] = useState("");
+  const [awsSecret, setAwsSecret] = useState("");
+  const [error, setError] = useState("");
+
+  const isOAuth = ["github", "gitlab", "slack"].includes(provider);
+  const isAWS = provider === "aws";
+
+  const handleConnect = async () => {
+    setError("");
+    setStep(1);
+    try {
+       let token = "";
+       if (isOAuth) {
+          await new Promise(r => setTimeout(r, 1500));
+          token = `oauth-token-${Date.now()}`;
+       } else if (isAWS) {
+          if (!awsKeyId || !awsSecret) throw new Error("AWS credentials required");
+          await new Promise(r => setTimeout(r, 1000));
+          token = `aws-${awsKeyId}`;
+       } else {
+          if (!apiKey) throw new Error("API Key mapping required");
+          await new Promise(r => setTimeout(r, 1000));
+          token = apiKey;
+       }
+       await addIntegration(provider, token);
+       setStep(2);
+       setTimeout(() => onSuccess(), 1000);
+    } catch (e: any) {
+       setError(e.message || "Connection failed. Please check credentials.");
+       setStep(0);
+    }
+  };
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <motion.div initial={{ y: 20, scale: 0.95 }} animate={{ y: 0, scale: 1 }} exit={{ y: 20, scale: 0.95 }} className={`w-full max-w-md rounded-2xl border shadow-xl overflow-hidden ${darkMode ? "bg-[#111] border-white/10" : "bg-white border-slate-200"}`}>
+        <div className={`p-4 border-b flex justify-between items-center ${darkMode ? "border-white/10 bg-white/5" : "border-slate-100 bg-slate-50"}`}>
+           <h3 className={`font-semibold ${darkMode ? "text-white" : "text-black"}`}>Connect {provider.toUpperCase()}</h3>
+           <button onClick={onClose} className={`p-1 rounded-md ${darkMode ? "hover:bg-white/10 text-slate-400" : "hover:bg-slate-200 text-slate-500"}`}>✕</button>
+        </div>
+        
+        <div className="p-6">
+           {step === 0 && (
+             <div className="space-y-4">
+                <p className={`text-sm ${darkMode ? "text-slate-300" : "text-slate-600"}`}>Authenticate with {provider} to enable automated workflows and real-time telemetry syncing.</p>
+                
+                {error && <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-medium">{error}</div>}
+
+                {isOAuth ? (
+                   <div className={`p-4 rounded-xl border text-center text-sm font-medium ${darkMode ? "bg-white/5 border-white/10 text-slate-300" : "bg-slate-50 border-slate-200 text-slate-700"}`}>
+                      Requires OAuth redirect authorization
+                   </div>
+                ) : isAWS ? (
+                   <div className="space-y-3">
+                      <input type="text" placeholder="AWS Access Key ID" value={awsKeyId} onChange={e => setAwsKeyId(e.target.value)} className={`w-full px-3 py-2 text-sm rounded-lg border outline-none ${darkMode ? "bg-black/50 border-white/10 text-white" : "bg-white border-slate-300"}`} />
+                      <input type="password" placeholder="AWS Secret Access Key" value={awsSecret} onChange={e => setAwsSecret(e.target.value)} className={`w-full px-3 py-2 text-sm rounded-lg border outline-none ${darkMode ? "bg-black/50 border-white/10 text-white" : "bg-white border-slate-300"}`} />
+                   </div>
+                ) : (
+                   <input type="password" placeholder="API Key Token" value={apiKey} onChange={e => setApiKey(e.target.value)} className={`w-full px-3 py-2 text-sm rounded-lg border outline-none ${darkMode ? "bg-black/50 border-white/10 text-white" : "bg-white border-slate-300"}`} />
+                )}
+
+                <div className="pt-4 flex justify-end gap-3">
+                   <button onClick={onClose} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${darkMode ? "hover:bg-white/10 text-slate-300" : "hover:bg-slate-100 text-slate-600"}`}>Cancel</button>
+                   <button onClick={handleConnect} className="px-4 py-2 rounded-lg text-sm font-medium bg-indigo-600 hover:bg-indigo-500 text-white transition-colors">Authorize Access</button>
+                </div>
+             </div>
+           )}
+
+           {step === 1 && (
+             <div className="py-8 flex flex-col items-center justify-center gap-4">
+               <div className="w-10 h-10 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+               <p className={`text-sm font-medium animate-pulse ${darkMode ? "text-slate-300" : "text-slate-600"}`}>Establishing secure handshake...</p>
+             </div>
+           )}
+
+           {step === 2 && (
+             <div className="py-8 flex flex-col items-center justify-center gap-4">
+               <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center">
+                  <Check className="w-6 h-6" />
+               </div>
+               <p className={`text-sm font-medium ${darkMode ? "text-slate-200" : "text-slate-800"}`}>Connection Successful</p>
+             </div>
+           )}
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
 const APIKeysSettings = ({ darkMode, showModal, addToast }: any) => {
   const [keys, setKeys] = useState<any[]>([]);
   const [newKeyName, setNewKeyName] = useState("");
@@ -576,7 +729,7 @@ const APIKeysSettings = ({ darkMode, showModal, addToast }: any) => {
           <div className="p-8 flex justify-center"><div className="w-6 h-6 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" /></div>
         ) : keys.length === 0 ? (
           <div className="p-8 text-center flex flex-col items-center gap-2">
-            <Key className={`w-8 h-8 ${darkMode ? "text-slate-600" : "text-slate-300"}`} />
+            <Key className={`w-8 h-8 ${darkMode ? "text-slate-900 font-medium" : "text-slate-300"}`} />
             <p className={`text-sm ${darkMode ? "text-slate-400" : "text-slate-500"}`}>No active API keys found.</p>
           </div>
         ) : (
@@ -676,7 +829,7 @@ const SystemSettings = ({ darkMode, prefs, setPrefs }: any) => (
     
     <div className="space-y-6 max-w-sm">
       <div className="space-y-2">
-        <label className={`text-sm font-medium flex items-center gap-2 ${darkMode ? "text-slate-300" : "text-slate-700"}`}>Primary Reasoning AI Model</label>
+        <label className={`text-sm font-medium flex items-center gap-2 ${darkMode ? "text-slate-300" : "text-black font-semibold"}`}>Primary Reasoning AI Model</label>
         <select value={prefs.default_ai_model || "Gemini 1.5 Pro"} onChange={(e) => setPrefs({ ...prefs, default_ai_model: e.target.value })} className={`w-full px-4 py-3 rounded-xl border text-sm transition-colors outline-none cursor-pointer ${darkMode ? "bg-black/50 border-white/10 text-white focus:border-indigo-500" : "bg-white border-slate-300 text-slate-900 focus:border-indigo-500"}`}>
           <option>Gemini 1.5 Pro (Balanced Logic)</option>
           <option>Gemini 1.5 Flash (Low Latency Voice)</option>
@@ -686,7 +839,7 @@ const SystemSettings = ({ darkMode, prefs, setPrefs }: any) => (
       </div>
       
       <div className="space-y-2">
-        <label className={`text-sm font-medium ${darkMode ? "text-slate-300" : "text-slate-700"}`}>Global Log Retention Period</label>
+        <label className={`text-sm font-medium ${darkMode ? "text-slate-300" : "text-black font-semibold"}`}>Global Log Retention Period</label>
         <select value={prefs.log_retention || "30 Days"} onChange={(e) => setPrefs({ ...prefs, log_retention: e.target.value })} className={`w-full px-4 py-3 rounded-xl border text-sm transition-colors outline-none cursor-pointer ${darkMode ? "bg-black/50 border-white/10 text-white focus:border-indigo-500" : "bg-white border-slate-300 text-slate-900 focus:border-indigo-500"}`}>
           <option>7 Days (Compliance)</option>
           <option>30 Days (Standard Context)</option>

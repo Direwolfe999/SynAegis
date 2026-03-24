@@ -169,7 +169,7 @@ export default function CloudDashboard({ onBack }: { onBack: () => void }) {
     };
 
     return (
-        <div className={`min-h-screen w-full flex flex-col font-sans transition-colors duration-300 ${darkMode ? "bg-[#050505] text-slate-200" : "bg-slate-50 text-slate-900"}`}>
+        <div className={`min-h-screen w-full flex flex-col font-sans transition-all duration-500 ease-in-out ${darkMode ? "bg-[#050505] text-slate-200" : "bg-slate-50 text-black font-medium"}`}>
 
             {/* Header */}
             <header className={`sticky top-0 z-50 px-4 sm:px-6 py-3 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3 backdrop-blur-xl ${darkMode ? "border-white/10 bg-[#050505]/90" : "border-slate-200 bg-white/95"} shadow-sm`}>
@@ -184,15 +184,12 @@ export default function CloudDashboard({ onBack }: { onBack: () => void }) {
                     <nav className="flex items-center gap-2 text-sm font-medium text-slate-500">
                         <button onClick={onBack} className="hover:text-blue-400 transition-colors">Workspace</button>
                         <span>/</span>
-                        <span className={darkMode ? "text-slate-200" : "text-slate-900"}>Infrastructure</span>
+                        <span className={darkMode ? "text-slate-200" : "text-black"}>Infrastructure</span>
                     </nav>
                 </div>
 
                 <div className="flex items-center gap-4 self-end sm:self-auto -mt-12 sm:mt-0">
-                    <button className="p-2 rounded-full hover:bg-slate-500/10 transition-colors relative">
-                        <Bell className="w-5 h-5" />
-                        <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-blue-500"></span>
-                    </button>
+                    <NotificationBell darkMode={darkMode} />
                     <button onClick={() => setDarkMode(!darkMode)} className="p-2 rounded-full hover:bg-slate-500/10 transition-colors">
                         {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                     </button>
