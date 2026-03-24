@@ -53,7 +53,9 @@ export default function GlobalCommandDashboard({ setActiveView }: { setActiveVie
     let reconnectTimer: NodeJS.Timeout;
 
     const connect = () => {
-      ws = new WebSocket('ws://localhost:8080/ws/dashboard');
+      const fallbackUrl = 'wss://synaegis-backend.onrender.com/ws/dashboard';
+      const url = process.env.NEXT_PUBLIC_BACKEND_WS_URL ? `${process.env.NEXT_PUBLIC_BACKEND_WS_URL}/dashboard` : fallbackUrl;
+      ws = new WebSocket(url);
 
       ws.onmessage = (event) => {
         const updatedData = JSON.parse(event.data);

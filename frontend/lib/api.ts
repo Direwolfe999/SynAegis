@@ -1,10 +1,7 @@
 const getApiBase = () => {
-    if (typeof window !== "undefined") {
-        return `${window.location.protocol}//${window.location.hostname}:8080/api`;
-    }
-    return "http://localhost:8080/api";
+    return process.env.NEXT_PUBLIC_BACKEND_API_URL || "https://synaegis-backend.onrender.com/api";
 };
-export const API_BASE = process.env.NEXT_PUBLIC_BACKEND_API_URL || getApiBase();
+export const API_BASE = getApiBase();
 
 export async function fetchDashboard() {
     try {

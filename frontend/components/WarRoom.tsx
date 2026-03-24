@@ -153,10 +153,7 @@ export default function WarRoom() {
     }, [backendMode]);
 
     const wsUrl = useMemo(() => {
-        const fallback =
-            typeof window !== "undefined"
-                ? `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.hostname}:8080/ws/warroom`
-                : "ws://localhost:8080/ws/warroom";
+        const fallback = "wss://synaegis-backend.onrender.com/ws/warroom";
         return process.env.NEXT_PUBLIC_BACKEND_WS_URL || fallback;
     }, []);
 

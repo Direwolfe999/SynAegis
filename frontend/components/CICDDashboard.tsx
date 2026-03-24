@@ -80,7 +80,7 @@ export default function CICDDashboard({ onBack }: { onBack: () => void }) {
         load();
 
         // WebSocket for real-time pipeline updates
-        const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://127.0.0.1:8080';
+        const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'wss://synaegis-backend.onrender.com';
         const socket = new WebSocket(`${wsUrl}/ws/pipeline`);
 
         socket.onopen = () => {

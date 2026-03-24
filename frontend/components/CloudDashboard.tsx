@@ -6,6 +6,7 @@ import {
     Search, Filter, ChevronDown, ChevronUp, Play, Square, RotateCcw,
     AlertCircle, Sparkles, Zap, HardDrive, Network, Database, ChevronRight, Share2, Layers
 } from "lucide-react";
+import { API_BASE } from "../lib/api";
 
 // Mock Data
 const MOCK_SERVICES = [
@@ -35,11 +36,11 @@ export default function CloudDashboard({ onBack }: { onBack: () => void }) {
 
     const fetchGreenCarbon = async () => {
         try {
-            const res = await fetch("http://localhost:8080/green/footprint");
+            const res = await fetch(`${API_BASE.replace('/api', '')}/green/footprint`);
             if (res.ok) {
                 return await res.json();
             }
-        } catch(e) { console.error(e) }
+        } catch (e) { console.error(e) }
         return null;
     };
 
@@ -51,9 +52,9 @@ export default function CloudDashboard({ onBack }: { onBack: () => void }) {
 
     const reapGreenZombies = async (days: number) => {
         try {
-            const res = await fetch(`http://localhost:8080/green/zombies?days_idle=${days}`, { method: 'POST' });
+            const res = await fetch(`${API_BASE.replace('/api', '')}/green/zombies?days_idle=${days}`, { method: 'POST' });
             return await res.json();
-        } catch(e) { console.error(e) }
+        } catch (e) { console.error(e) }
         return null;
     };
     const handleReapZombies = async () => {
@@ -169,7 +170,7 @@ export default function CloudDashboard({ onBack }: { onBack: () => void }) {
                         <div className="flex items-center gap-2 text-emerald-500 mb-2 font-bold text-xs uppercase tracking-wider">
                             <Leaf className="w-4 h-4" /> GreenOps Impact
                         </div>
-                        <div className="text-3xl font-light text-emerald-400">{greenCarbon ? (greenCarbon.total_carbon_g/1000).toFixed(2) : '...'}<span className="text-sm ml-2 font-medium">kg CO₂e</span></div><div className="text-[10px] text-emerald-500/70 mt-1">{greenCarbon ? greenCarbon.verdict : 'Analyzing...'}</div>
+                        <div className="text-3xl font-light text-emerald-400">{greenCarbon ? (greenCarbon.total_carbon_g / 1000).toFixed(2) : '...'}<span className="text-sm ml-2 font-medium">kg CO₂e</span></div><div className="text-[10px] text-emerald-500/70 mt-1">{greenCarbon ? greenCarbon.verdict : 'Analyzing...'}</div>
                     </div>
                 </div>
 
