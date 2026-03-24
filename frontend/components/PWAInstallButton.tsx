@@ -35,7 +35,18 @@ export default function PWAInstallButton() {
         setDeferredPrompt(null);
     };
 
-    if (!isInstallable) return null;
+    if (!isInstallable) {
+        return (
+            <button
+                disabled
+                className="flex items-center gap-2 rounded-lg bg-slate-500/10 px-4 py-2 text-sm font-medium text-slate-500 border border-slate-500/20 cursor-not-allowed"
+                title="PWA already installed or not supported by this browser"
+            >
+                <Download className="h-4 w-4" />
+                <span>Install App</span>
+            </button>
+        );
+    }
 
     return (
         <button

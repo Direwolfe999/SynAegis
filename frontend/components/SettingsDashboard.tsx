@@ -662,6 +662,13 @@ const AppearanceSettings = ({ darkMode, setDarkMode, prefs, setPrefs }: any) => 
 /* --- System Settings --- */
 const SystemSettings = ({ darkMode, prefs, setPrefs }: any) => (
   <div className="space-y-6 md:space-y-8">
+    <div className={`p-4 mb-4 rounded-xl border flex items-center justify-between ${darkMode ? "bg-cyan-950/20 border-cyan-500/30" : "bg-cyan-50 border-cyan-200"}`}>
+      <div>
+        <h3 className={`text-sm font-semibold mb-1 ${darkMode ? "text-cyan-400" : "text-cyan-700"}`}>Install Desktop App</h3>
+        <p className={`text-xs ${darkMode ? "text-cyan-200/60" : "text-cyan-600/80"}`}>Get the native offline experience with push notifications.</p>
+      </div>
+      <PWAInstallButton />
+    </div>
     <div>
       <h2 className="text-xl font-semibold mb-1">Core Architecture Parameters</h2>
       <p className={`text-sm ${darkMode ? "text-slate-400" : "text-slate-500"}`}>Control internal logical systems and AI behavioral deployments.</p>
