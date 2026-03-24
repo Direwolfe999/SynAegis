@@ -2,6 +2,7 @@ const getApiBase = () => {
     return process.env.NEXT_PUBLIC_BACKEND_API_URL || "https://synaegis-backend.onrender.com/api";
 };
 export const API_BASE = getApiBase();
+export const WS_BASE = API_BASE.replace(/^http/, 'ws').replace(/\/api$/, '/ws');
 
 export async function fetchDashboard() {
     try {
@@ -238,5 +239,16 @@ export async function resolveSimulation(status: string) {
     } catch (error) {
         console.error(error);
         return null;
+    }
+}
+
+export async function triggerPipelineAction(id: string, action: string) {
+    try {
+        const res = await fetch(`${API_BASE}/pipeline/${id}/${action}`, { method: 'POST' });
+        if (!res.ok) throw new Error("Action failed");
+        return await res.json();
+    } catch (error) {
+        console.error("Action error:", error);
+        throw error;
     }
 }

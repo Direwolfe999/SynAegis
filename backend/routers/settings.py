@@ -33,7 +33,7 @@ def update_profile(profile: ProfileUpdate):
     cursor = conn.cursor()
     cursor.execute('''
         UPDATE users SET first_name=?, last_name=?, email=?, bio=? 
-        WHERE email='arivera@synaegis.com'
+        WHERE id=(SELECT id FROM users LIMIT 1)
     ''', (profile.first_name, profile.last_name, profile.email, profile.bio))
     conn.commit()
     return {"message": "Profile updated successfully"}
@@ -48,7 +48,7 @@ def update_security(sec: SecurityUpdate):
         raise HTTPException(status_code=400, detail="Invalid current password")
     
     new_hash = bcrypt.hashpw(sec.new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-    cursor.execute("UPDATE users SET password_hash=? WHERE email='arivera@synaegis.com'", (new_hash,))
+    cursor.execute("UPDATE users SET password_hash=? WHERE id=(SELECT id FROM users LIMIT 1)", (new_hash,))
     conn.commit()
     return {"message": "Password updated successfully"}
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-import { API_BASE } from "../lib/api";
+import { API_BASE, WS_BASE } from "../lib/api";
 import { useToast } from "./ToastProvider";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -36,14 +36,14 @@ const MOCK_LOGS = [
 
 function AnimatedNumber({ value }: { value: number }) {
     const [display, setDisplay] = useState(value);
-    
+
     useEffect(() => {
         let start = display;
         if (start === value) return;
-        
+
         const duration = 500;
         let startTime = performance.now();
-        
+
         const animate = (time: number) => {
             const progress = Math.min((time - startTime) / duration, 1);
             setDisplay(Math.floor(start + (value - start) * progress));
@@ -53,7 +53,7 @@ function AnimatedNumber({ value }: { value: number }) {
         };
         requestAnimationFrame(animate);
     }, [value]);
-    
+
     return <>{display.toLocaleString()}</>;
 }
 
@@ -102,20 +102,16 @@ export default function SecurityDashboard({ onBack }: { onBack: () => void }) {
             if (isMounted && data) setMetrics(data);
         }).catch(err => console.error("Metrics fetch error:", err));
 
-        const wsHost = API_BASE.replace("http://", "").replace("https://", "").replace("/api", "");
-        const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-        const wsUrl = `${protocol}//${wsHost}/ws/security`;
-        
-        const ws = new WebSocket(wsUrl);
+        const ws = new WebSocket(`${WS_BASE}/security`);
         ws.onmessage = (event) => {
             try {
                 const payload = JSON.parse(event.data);
                 if (payload.type === 'metrics_update' && isMounted) {
                     setMetrics(payload.data);
                 }
-            } catch(e) {}
+            } catch (e) { }
         };
-        
+
         return () => {
             isMounted = false;
             ws.close();
@@ -150,10 +146,113 @@ export default function SecurityDashboard({ onBack }: { onBack: () => void }) {
         }
     }, [isScanning]);
 
-    const handleAction = (action: string) => {
-        setActiveAction(action);
-        setTimeout(() => setActiveAction(null), 1500);
+    const blockIp = async () => {
+        setActiveAction("block-ip");
+        try {
+            await fetch(`${API_BASE}/security/block-ip`, { method: "POST" });
+            addToast("IP successfully blocked across all nodes.", "success");
+            setLogs(prev => [`[${new Date().toLocaleTimeString()}] 🛡️ [SECURITY ACTION] IP blocked successfully.`, ...prev]);
+        } catch (e) {
+            addToast("Failed to block IP", "error");
+        } finally {
+            setActiveAction(null);
+        }
     };
+
+    const revokeToken = async () => {
+        setActiveAction("revoke");
+        try {
+            await fetch(`${API_BASE}/security/revoke-token`, { method: "POST" });
+            addToast("Active API tokens revoked.", "success");
+            setLogs(prev => [`[${new Date().toLocaleTimeString()}] 🔑 [SECURITY ACTION] Tokens revoked globally.`, ...prev]);
+        } catch (e) {
+            addToast("Failed to revoke keys", "error");
+        } finally {
+            setActiveAction(null);
+        }
+    };
+
+    const lockAccount = async () => {
+        setActiveAction("lock");
+        try {
+            await fetch(`${API_BASE}/security/lock-account`, { method: "POST" });
+            addToast("Suspicious account locked.", "success");
+            setLogs(prev => [`[${new Date().toLocaleTimeString()}] 🔒 [SECURITY ACTION] Administrator account locked.`, ...prev]);
+        } catch (e) {
+            addToast("Failed to lock account", "error");
+        } finally {
+            setActiveAction(null);
+        }
+    };
+
+    const isolateNode = async () => {
+        setActiveAction("isolate");
+        try {
+            await fetch(`${API_BASE}/security/isolate-node`, { method: "POST" });
+            addToast("Node isolated from the cluster network.", "success");
+            setLogs(prev => [`[${new Date().toLocaleTimeString()}] 🛑 [SECURITY ACTION] Node isolation sequence complete.`, ...prev]);
+        } catch (e) {
+            addToast("Failed to isolate node", "error");
+        } finally {
+            setActiveAction(null);
+        }
+    };
+
+    const handleAction = (action: string) => {
+        const actionMap: Record<string, { label: string, flow: () => Promise<void>, riskLevel: any, impact: string }> = {
+            'block-ip': { label: "Block IP Address", flow: blockIp, riskLevel: "high", impact: "This will permanently drop all ingress/egress network traffic from this IP pattern across the entire global CDN." },
+            'revoke': { label: "Revoke Tokens", flow: revokeToken, riskLevel: "critical", impact: "All current active session tokens for the affected user pool will be immediately invalidated. Users will be forcefully logged out." },
+            'lock': { label: "Lock Account", flow: lockAccount, riskLevel: "medium", impact: "The compromised account will be locked. Identity re-verification will be required to unlock." },
+            'isolate': { label: "Isolate Node", flow: isolateNode, riskLevel: "critical", impact: "The impacted worker node will be completely severed from the cluster overlay network, breaking all internal service meshes temporarily." }
+        };
+        const cfg = actionMap[action];
+        if (!cfg) return;
+
+        showModal({
+            title: `Confirm Security Action: ${cfg.label}`,
+            description: `Are you sure you want to execute this global security action?`,
+            riskLevel: cfg.riskLevel as "low" | "medium" | "high" | "critical",
+            impact: cfg.impact,
+            confirmText: `Execute ${cfg.label}`,
+            onConfirm: cfg.flow
+        });
+    };
+
+    const executeAiAction = async (type: string) => {
+        setActiveAction(`ai-${type}`);
+        try {
+            await fetch(`${API_BASE}/security/action/ai-${type}`, { method: "POST" });
+            addToast(`AI Auto-Action Executed successfully.`, "success");
+            if (type === 'block') {
+                setLogs(prev => [`[${new Date().toLocaleTimeString()}] 🤖 [AI ACTION] Blocked IP 10.0.0.88 (confidence 94%)`, ...prev]);
+            } else {
+                setLogs(prev => [`[${new Date().toLocaleTimeString()}] 🤖 [AI ACTION] Auto-fix MR for CVE-2023-4863 created (confidence 98%)`, ...prev]);
+            }
+        } catch (e) {
+            addToast("Failed to run AI action", "error");
+        } finally {
+            setActiveAction(null);
+        }
+    };
+
+    const triggerAiAction = (type: string) => {
+        showModal({
+            title: `AI Autonomous Intervention Validated`,
+            description: type === 'block' ? `AI recommends an immediate block on IP 10.0.0.88 based on persistent behavioral trajectory profiling.` : `AI has generated a verified patch for CVE-2023-4863 bounding 'urllib3'.`,
+            riskLevel: "medium",
+            impact: type === 'block' ? "The IP address block rule will be propagated immediately via Cloud NAT." : "A Merge Request will be opened against the main protected branch with auto-test pipeline triggered.",
+            confirmText: "Authorize AI Protocol",
+            onConfirm: () => executeAiAction(type)
+        });
+    };
+
+    const startScan = async () => {
+        setIsScanning(true);
+        setScanProgress(0);
+        addToast("Zero-Day scan initiated", "info");
+        setLogs(prev => [`[${new Date().toLocaleTimeString()}] 🔎 [VULNERABILITY SCAN] System deep scan running...`, ...prev]);
+    }
+
 
     const SeverityBadge = ({ level }: { level: string }) => {
         const styles = {
@@ -198,10 +297,10 @@ export default function SecurityDashboard({ onBack }: { onBack: () => void }) {
                 </div>
             </header>
 
-            <main className="flex-1 p-6 lg:p-8 max-w-[1600px] mx-auto w-full flex flex-col gap-6">
+            <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto w-full flex flex-col gap-6">
 
                 {/* Sticky Threat Overview Bar */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sticky top-20 z-40">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sticky top-20 z-40">
                     <div className={`px-6 py-4 rounded-2xl border flex flex-col justify-center relative overflow-hidden ${darkMode ? "bg-red-950/20 border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.1)]" : "bg-red-50 border-red-200 shadow-sm"}`}>
                         <div className="absolute -right-4 -top-4 w-16 h-16 bg-red-500/10 rounded-full blur-xl"></div>
                         <span className="text-xs text-red-500 uppercase tracking-wider font-bold mb-1 flex items-center gap-1.5"><ShieldAlert className="w-3.5 h-3.5" /> Total Threats Today</span>
@@ -280,7 +379,7 @@ export default function SecurityDashboard({ onBack }: { onBack: () => void }) {
                                         <Activity className="w-4 h-4 text-cyan-400" /> Vulnerability Scanner
                                     </h2>
                                     <button
-                                        onClick={() => { setIsScanning(true); setScanProgress(0); }}
+                                        onClick={startScan}
                                         disabled={isScanning}
                                         className="bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                     >
@@ -322,7 +421,7 @@ export default function SecurityDashboard({ onBack }: { onBack: () => void }) {
                                 <h2 className="text-base font-medium flex items-center gap-2 mb-4">
                                     <Zap className="w-4 h-4 text-purple-400" /> Security Actions
                                 </h2>
-                                <div className="grid grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <button
                                         onClick={() => handleAction('block-ip')}
                                         className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-2 text-sm font-medium transition-all ${activeAction === 'block-ip' ? 'bg-red-500 border-red-400 text-white shadow-[0_0_15px_rgba(239,68,68,0.5)]' : darkMode ? 'bg-red-500/5 hover:bg-red-500/10 border-red-500/20 text-red-400' : 'bg-red-50 hover:bg-red-100 border-red-200 text-red-600'}`}

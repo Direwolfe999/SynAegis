@@ -27,7 +27,7 @@ export const PipelineMonitor = () => {
     ];
 
     return (
-        <div className="flex flex-col gap-5 p-6 rounded-3xl bg-[#0a0a0a] border border-white/5 shadow-xl relative overflow-hidden">
+        <div className="flex flex-col gap-5 p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-[#0a0a0a] border border-white/5 shadow-xl relative overflow-hidden">
             <div className="flex items-center justify-between">
                 <h3 className="text-lg font-medium text-white flex items-center gap-2">
                     <span className="text-blue-400">🚀</span> Active Pipelines
@@ -62,7 +62,7 @@ export const PipelineMonitor = () => {
 };
 
 export const SecurityCenter = () => (
-    <div className="flex flex-col gap-5 p-6 rounded-3xl bg-[#0a0a0a] border border-white/5 shadow-xl relative overflow-hidden">
+    <div className="flex flex-col gap-5 p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-[#0a0a0a] border border-white/5 shadow-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 blur-[50px] pointer-events-none" />
         <div className="flex items-center justify-between z-10 w-full">
             <h3 className="text-lg font-medium text-white flex items-center gap-2">
@@ -96,7 +96,7 @@ export const SecurityCenter = () => (
 );
 
 export const CloudControlPanel = () => (
-    <div className="flex flex-col gap-5 p-6 rounded-3xl bg-[#0a0a0a] border border-white/5 shadow-xl w-full">
+    <div className="flex flex-col gap-5 p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-[#0a0a0a] border border-white/5 shadow-xl w-full">
         <h3 className="text-lg font-medium text-white flex items-center gap-2">
             <span className="text-cyan-400">☁️</span> Cloud Infrastructure
         </h3>
@@ -149,7 +149,7 @@ export const AgentActivityFeed = () => {
     ];
 
     return (
-        <div className="flex flex-col gap-5 p-6 rounded-3xl bg-[#0a0a0a] border border-white/5 shadow-xl h-full w-full">
+        <div className="flex flex-col gap-5 p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-[#0a0a0a] border border-white/5 shadow-xl h-full w-full">
             <h3 className="text-lg font-medium text-white flex items-center gap-2 border-b border-white/5 pb-4">
                 <span className="text-purple-400 w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span> Agent Execution Feed
             </h3>
@@ -175,7 +175,7 @@ export const AgentActivityFeed = () => {
 };
 
 export const SustainabilityPanel = () => (
-    <div className="flex flex-col gap-5 p-6 rounded-3xl bg-gradient-to-br from-[#0a0a0d] to-[#041a12] border border-emerald-500/10 shadow-xl overflow-hidden relative w-full h-full">
+    <div className="flex flex-col gap-5 p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#0a0a0d] to-[#041a12] border border-emerald-500/10 shadow-xl overflow-hidden relative w-full h-full">
         <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/10 blur-[60px] rounded-full pointer-events-none" />
         <h3 className="text-lg font-medium text-white flex items-center gap-2 z-10 w-full">
             <span className="text-emerald-400">🌿</span> Green IT Metrics

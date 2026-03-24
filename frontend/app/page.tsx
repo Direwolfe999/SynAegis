@@ -79,7 +79,7 @@ function DashboardContent() {
                     {(activeView !== "warroom" && activeView !== "pipelines" && activeView !== "security" && activeView !== "cloud" && activeView !== "settings" && activeView !== "devops") && <FloatingActions addToast={addToast} />}
 
                     {/* Main Content Area - padded left for sidebar */}
-                    <div className={`flex-1 transition-all duration-300 ${activeView !== 'warroom' && activeView !== 'pipelines' && activeView !== 'security' && activeView !== 'cloud' && activeView !== 'settings' ? 'ml-20' : ''}`}>
+                    <div className={`flex-1 transition-all duration-300 ${activeView !== 'warroom' && activeView !== 'pipelines' && activeView !== 'security' && activeView !== 'cloud' && activeView !== 'settings' && activeView !== 'devops' ? 'mb-20 md:ml-20 md:mb-0' : ''}`}>
                         {/* Background Effects */}
                         <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_10%,rgba(6,182,212,0.15),transparent_50%)] pointer-events-none" />
                         <div className="fixed inset-0 flex z-0 pointer-events-none items-center justify-center opacity-[0.05]">

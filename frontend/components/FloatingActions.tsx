@@ -17,10 +17,10 @@ export const FloatingActions = ({ addToast }: any) => {
     };
 
     return (
-        <div className="fixed bottom-8 right-8 z-[200] flex flex-col items-end gap-4">
+        <div className="fixed bottom-24 md:bottom-8 right-4 md:right-8 z-[200] flex flex-col items-end gap-4">
             <AnimatePresence>
                 {open && (
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, y: 20, scale: 0.8 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.8 }}
@@ -46,13 +46,12 @@ export const FloatingActions = ({ addToast }: any) => {
                 )}
             </AnimatePresence>
 
-            <motion.button 
+            <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setOpen(!open)}
-                className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-2xl transition-all duration-300 z-50 border-2 ${
-                    open ? 'bg-white text-black border-white/20 rotate-45' : 'bg-gradient-to-tr from-blue-600 to-cyan-400 text-white border-blue-400/50'
-                }`}
+                className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-2xl transition-all duration-300 z-50 border-2 ${open ? 'bg-white text-black border-white/20 rotate-45' : 'bg-gradient-to-tr from-blue-600 to-cyan-400 text-white border-blue-400/50'
+                    }`}
             >
                 {open ? '➕' : '⚡'}
             </motion.button>

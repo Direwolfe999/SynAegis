@@ -32,3 +32,15 @@ async def cloud_history():
             "memory_usage": round(random.uniform(30, 80), 2)
         })
     return history
+
+@router.post("/services/{service_id}/{action}")
+async def service_action(service_id: str, action: str):
+    import asyncio
+    await asyncio.sleep(0.5)
+    return {"status": "ok", "message": f"Service {service_id} {action}ed successfully."}
+
+@router.post("/{action}")
+async def trigger_cloud_global_action(action: str):
+    import asyncio
+    await asyncio.sleep(0.5)
+    return {"status": "ok", "message": f"Global action {action} triggered."}

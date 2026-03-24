@@ -68,7 +68,7 @@ export default function DevOpsControlCenter({ onBack }: { onBack: () => void }) 
       </div>
 
       {/* Overview Bar */}
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
         <StatCard title="Total Projects" value="34" icon={FolderDot} colorClass="hover:border-blue-500/50 text-blue-400" />
         <StatCard title="Active Pipelines" value="8" icon={Play} colorClass="hover:border-emerald-500/50 text-emerald-400" />
         <StatCard title="Open MRs" value="12" icon={GitMerge} colorClass="hover:border-purple-500/50 text-purple-400" />

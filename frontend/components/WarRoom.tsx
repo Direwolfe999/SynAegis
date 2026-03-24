@@ -120,6 +120,8 @@ export default function WarRoom() {
     const [lastPingMs, setLastPingMs] = useState<number | null>(null);
     const [promptText, setPromptText] = useState("");
     const [isEntered, setIsEntered] = useState(false);
+    const [mobileTab, setMobileTab] = useState<"logs" | "vision" | "diagnostics">("logs");
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const wsRef = useRef<WebSocket | null>(null);
     const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -418,7 +420,7 @@ export default function WarRoom() {
                     setAiLevel(0.72);
                     const stopDiff = Math.max(420, (startTime - ctx.currentTime + buffer.duration) * 1000);
                     window.setTimeout(() => setAiLevel(0.14), stopDiff);
-                } catch(e) {
+                } catch (e) {
                     console.error("Audio playback error:", e);
                 }
             } else if (msg.type === "audio_frequency") {
@@ -588,15 +590,15 @@ export default function WarRoom() {
                         transition={{ duration: 0.5 }}
                         className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-[#050505] bg-[radial-gradient(circle_at_50%_50%,rgba(6,182,212,0.1),transparent_70%)] text-slate-200"
                     >
-                        <div className="text-center">
+                        <div className="text-center px-4 w-full">
                             <motion.div
                                 initial={{ scale: 0.8, opacity: 0 }}
                                 animate={{ scale: 1, opacity: 1 }}
                                 transition={{ delay: 0.2 }}
                                 className="mb-8"
                             >
-                                <img src="/logos/wording.png" alt="SynAegis" className="h-24 md:h-32 xl:h-40 w-auto mx-auto opacity-80" />
-                                <div className="mt-6 text-sm md:text-base xl:text-lg tracking-[0.3em] text-cyan-400/60 uppercase">
+                                <img src="/logos/wording.png" alt="SynAegis" className="h-16 sm:h-24 md:h-32 xl:h-40 w-auto mx-auto opacity-80" />
+                                <div className="mt-6 text-xs sm:text-sm md:text-base xl:text-lg tracking-[0.2em] sm:tracking-[0.3em] text-cyan-400/60 uppercase">
                                     Secure Connection Protocol
                                 </div>
                             </motion.div>
@@ -606,10 +608,10 @@ export default function WarRoom() {
                                 animate={{ y: 0, opacity: 1 }}
                                 transition={{ delay: 0.4 }}
                                 onClick={() => setIsEntered(true)}
-                                className="group relative overflow-hidden rounded-xl border border-cyan-500/30 bg-cyan-950/20 px-12 py-4 backdrop-blur-md transition-all hover:bg-cyan-900/40 hover:border-cyan-400"
+                                className="group relative overflow-hidden rounded-xl border border-cyan-500/30 bg-cyan-950/20 px-8 sm:px-12 py-3 sm:py-4 backdrop-blur-sm sm:backdrop-blur-md transition-all hover:bg-cyan-900/40 hover:border-cyan-400 w-full max-w-xs min-h-[44px]"
                             >
                                 <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
-                                <span className="relative text-base md:text-xl xl:text-2xl tracking-[0.2em] font-medium text-cyan-100">
+                                <span className="relative text-xs sm:text-sm tracking-[0.1em] font-medium text-cyan-100 whitespace-nowrap">
                                     INITIALIZE WAR ROOM
                                 </span>
                             </motion.button>
@@ -618,7 +620,7 @@ export default function WarRoom() {
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 transition={{ delay: 0.6 }}
-                                className="mt-8 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 text-xs md:text-sm text-slate-500 uppercase tracking-widest"
+                                className="mt-8 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 text-[10px] md:text-xs xl:text-sm text-slate-500 uppercase tracking-widest sm:animate-none"
                             >
                                 <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Audio Live</span>
                                 <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Vision Ready</span>
@@ -631,24 +633,20 @@ export default function WarRoom() {
 
             {/* Main Interface */}
             {isEntered && (
-                <main className="relative min-h-screen overflow-hidden bg-[#050505] text-slate-100">
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_48%,rgba(30,41,59,0.35),transparent_58%)]" />
+                <main className="relative min-h-[100dvh] overflow-hidden bg-[#050505] text-slate-100 flex flex-col md:block">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_48%,rgba(30,41,59,0.35),transparent_58%)] z-[0]" />
 
-                    {/* Subtle immersive logo background */}
-                    <div className="fixed inset-0 flex z-0 pointer-events-none items-center justify-center opacity-[0.03]">
+                    <div className="fixed inset-0 flex z-[0] pointer-events-none items-center justify-center opacity-[0.03]">
                         <img src="/logos/full.png" alt="SynAegis Motif" className="w-[1000px] h-[1000px] object-contain grayscale blur-[3px]" />
                     </div>
-                    {/* Subtle immersive logo background */}
-                    <div className="fixed inset-0 flex z-0 pointer-events-none items-center justify-center opacity-[0.03]">
-                        <img src="/logos/full.png" alt="SynAegis Motif" className="w-[1000px] h-[1000px] object-contain grayscale blur-[3px]" />
-                    </div>
+
                     <AnimatePresence>
                         {orbState === "reconnecting" && (
                             <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
-                                className="absolute inset-0 z-50 grid place-items-center bg-black/40 backdrop-blur-sm"
+                                className="absolute inset-0 z-[50] grid place-items-center bg-black/40 backdrop-blur-sm"
                             >
                                 <div className="reconnect-grid rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-center backdrop-blur-xl sm:px-6 sm:py-4">
                                     <p className="text-sm tracking-wide text-slate-200 sm:text-lg">SynAegis // Realigning Neural Pathways...</p>
@@ -657,90 +655,194 @@ export default function WarRoom() {
                         )}
                     </AnimatePresence>
 
-                    <OpticalFeed active={cameraActive} videoRef={videoRef} />
-                    <SystemDiagnostics visible={showDiag} metrics={metrics} />
-                    <ProtocolLogs logs={logs} />
-                    <LiveTranscription text={transcript} />
+                    {/* DESKTOP relies on floating items, MOBILE uses flex col */}
+                    <div className="relative z-10 flex flex-col h-[100dvh] md:block md:min-h-screen pb-[env(safe-area-inset-bottom)] sm:animate-none">
 
-                    <section className="relative z-10 flex min-h-screen items-center justify-center px-4">
-                        <div className="text-center">
-                            <div className="relative z-40 mb-3 flex flex-wrap items-center justify-center gap-2 text-[9px] uppercase tracking-[0.16em] sm:text-[10px]">
-                                <span className={`rounded-full border px-2 py-1 ${backendMode === "fallback" ? "border-amber-300/40 bg-amber-500/10 text-amber-200" : "border-emerald-300/40 bg-emerald-500/10 text-emerald-200"}`}>
-                                    {backendMode === "fallback" ? "fallback mode" : "live mode"}
-                                </span>
-                                <button
-                                    onClick={() => {
-                                        setVisionEnabled((prev) => {
-                                            const next = !prev;
-                                            pushLog(`Vision uplink ${next ? "enabled" : "disabled"}.`);
-                                            return next;
-                                        });
-                                    }}
-                                    className={`rounded-full border px-2 py-1 transition-colors hover:bg-white/10 ${visionEnabled ? "border-cyan-300/40 bg-cyan-500/10 text-cyan-200" : "border-slate-500/40 bg-slate-700/20 text-slate-300"}`}>
-                                    vision {visionEnabled ? "on" : "off"}
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setMicMuted((prev) => {
-                                            const next = !prev;
-                                            pushLog(`Mic uplink ${next ? "muted" : "live"}.`);
-                                            return next;
-                                        });
-                                    }}
-                                    className={`rounded-full border px-2 py-1 transition-colors hover:bg-white/10 ${micMuted ? "border-rose-300/40 bg-rose-500/10 text-rose-200" : "border-cyan-300/40 bg-cyan-500/10 text-cyan-200"}`}>
-                                    mic {micMuted ? "muted" : "live"}
-                                </button>
-                                {lastPingMs !== null && (
-                                    <span className="rounded-full border border-white/20 bg-white/5 px-2 py-1 text-slate-200">ping {lastPingMs}ms</span>
-                                )}
-                            </div>
-                            <h1 className="mb-1 bg-gradient-to-r from-cyan-300 via-white to-cyan-300 bg-clip-text text-[13px] font-extralight uppercase tracking-[0.45em] text-transparent drop-shadow-[0_0_12px_rgba(103,232,249,0.35)] sm:mb-2 sm:text-base sm:tracking-[0.5em] md:text-lg">
-                                SynAegis
-                            </h1>
-                            <div className="mx-auto mb-3 h-px w-10 bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent sm:mb-4 sm:w-14" />
-                            <SynAegisOrb state={orbState} userLevel={userLevel} aiLevel={aiLevel} rippling={rippling} />
-                            <p className="mt-3 text-[9px] font-light uppercase tracking-[0.25em] text-slate-400/90 sm:mt-4 sm:text-[11px] sm:tracking-[0.3em]">
-                                {orbState === "idle" ? "awaiting signal" : orbState}
-                            </p>
-                        </div>
-                    </section>
-
-                    <audio ref={audioRef} className="hidden" />
-
-                    <div
-                        role="button"
-                        tabIndex={0}
-                        onMouseEnter={() => setHovering(true)}
-                        onMouseLeave={() => setHovering(false)}
-                        onClick={() => {
-                            if (orbState === "idle") {
-                                void connect();
-                            } else {
-                                sendJson({ type: "barge_in" });
-                                setRippling(true);
-                                window.setTimeout(() => setRippling(false), 280);
-                            }
-                        }}
-                        onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ") {
-                                e.preventDefault();
+                        {/* Interactive Background */}
+                        <div
+                            role="button"
+                            tabIndex={0}
+                            onMouseEnter={() => setHovering(true)}
+                            onMouseLeave={() => setHovering(false)}
+                            onClick={() => {
                                 if (orbState === "idle") {
                                     void connect();
                                 } else {
                                     sendJson({ type: "barge_in" });
+                                    setRippling(true);
+                                    window.setTimeout(() => setRippling(false), 280);
                                 }
-                            }
-                            if (e.key.toLowerCase() === "x") {
-                                void disconnect();
-                            }
-                        }}
-                        className="absolute inset-0 z-30 cursor-pointer"
-                        aria-label="Toggle voice presence"
-                    />
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter" || e.key === " ") {
+                                    e.preventDefault();
+                                    if (orbState === "idle") {
+                                        void connect();
+                                    } else {
+                                        sendJson({ type: "barge_in" });
+                                    }
+                                }
+                                if (e.key.toLowerCase() === "x") {
+                                    void disconnect();
+                                }
+                            }}
+                            className="absolute inset-0 z-[25] cursor-pointer"
+                            aria-label="Toggle voice presence"
+                        />
 
-                    {true && (
-                        <div className="pointer-events-auto absolute bottom-16 left-1/2 z-[40] w-[min(92vw,28rem)] -translate-x-1/2 rounded-xl border border-white/15 bg-black/40 p-2 backdrop-blur-xl sm:bottom-20 sm:p-3">
-                            <div className="flex gap-2">
+                        {/* 1. TOP STATUS BAR + ORB SECTION */}
+                        <section className="flex flex-col items-center justify-start pt-6 pb-2 md:pt-0 md:pb-0 md:justify-center px-1 md:px-2 z-[30] md:absolute md:inset-0 pointer-events-none w-full shadow-md md:shadow-none bg-black/10 md:bg-transparent">
+                            <div className="text-center w-full max-w-full pointer-events-auto">
+                                <div className="mb-4 flex flex-wrap items-center justify-center gap-1.5 md:gap-2 text-[9px] sm:text-[10px] uppercase tracking-[0.16em]">
+                                    <span className={`rounded-full border px-3 py-1.5 min-h-[32px] md:min-h-[36px] flex items-center justify-center whitespace-nowrap ${backendMode === "fallback" ? "border-amber-300/40 bg-amber-500/10 text-amber-200" : "border-emerald-300/40 bg-emerald-500/10 text-emerald-200"}`}>
+                                        {backendMode === "fallback" ? "fallback mode" : "live mode"}
+                                    </span>
+                                    <button
+                                        onClick={() => {
+                                            setVisionEnabled((prev) => {
+                                                const next = !prev;
+                                                pushLog(`Vision uplink ${next ? "enabled" : "disabled"}.`);
+                                                return next;
+                                            });
+                                        }}
+                                        className={`rounded-full border px-3 py-1.5 min-h-[32px] md:min-h-[36px] flex items-center justify-center whitespace-nowrap transition-colors hover:bg-white/10 ${visionEnabled ? "border-cyan-300/40 bg-cyan-500/10 text-cyan-200" : "border-slate-500/40 bg-slate-700/20 text-slate-300"}`}
+                                    >
+                                        vision {visionEnabled ? "on" : "off"}
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setMicMuted((prev) => {
+                                                const next = !prev;
+                                                pushLog(`Mic uplink ${next ? "muted" : "live"}.`);
+                                                return next;
+                                            });
+                                        }}
+                                        className={`rounded-full border px-3 py-1.5 min-h-[32px] md:min-h-[36px] flex items-center justify-center whitespace-nowrap transition-colors hover:bg-white/10 ${micMuted ? "border-rose-300/40 bg-rose-500/10 text-rose-200" : "border-cyan-300/40 bg-cyan-500/10 text-cyan-200"}`}
+                                    >
+                                        mic {micMuted ? "muted" : "live"}
+                                    </button>
+                                    {lastPingMs !== null && (
+                                        <span className="rounded-full border border-white/20 bg-white/5 px-3 py-1.5 min-h-[32px] md:min-h-[36px] flex items-center justify-center text-slate-200 whitespace-nowrap">
+                                            ping {lastPingMs}ms
+                                        </span>
+                                    )}
+                                </div>
+                                <h1 className="mb-1 bg-gradient-to-r from-cyan-300 via-white to-cyan-300 bg-clip-text text-[13px] font-extralight uppercase tracking-[0.45em] text-transparent drop-shadow-[0_0_12px_rgba(103,232,249,0.35)] sm:mb-2 sm:text-base sm:tracking-[0.5em] md:text-lg">
+                                    SynAegis
+                                </h1>
+                                <div className="mx-auto mb-3 h-px w-10 bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent sm:mb-4 sm:w-14" />
+
+                                {/* 2. ORB SECTION */}
+                                <div className="mt-4 md:mt-0 mb-4 md:mb-0 scale-75 sm:scale-90 md:scale-100 transition-transform flex justify-center mx-auto relative max-w-full px-2">
+                                    <SynAegisOrb state={orbState} userLevel={userLevel} aiLevel={aiLevel} rippling={rippling} />
+                                </div>
+
+                                <p className="mt-2 text-[9px] font-light uppercase tracking-[0.25em] text-slate-400/90 sm:mt-4 sm:text-[11px] sm:tracking-[0.3em]">
+                                    {orbState === "idle" ? "awaiting signal" : orbState}
+                                </p>
+                            </div>
+                        </section>
+
+                        {/* 3. LIVE TRANSCRIPTION (FEEDBACK) */}
+                        <div className="flex-shrink-0 w-full px-2 mt-auto mb-2 relative z-[35] md:z-auto max-md:[&>div]:!static max-md:[&>div]:!w-full max-md:[&>div]:!bottom-auto max-md:[&>div]:!left-auto max-md:[&>div]:!transform-none max-md:[&>div]:!mb-0 max-md:[&>div]:min-h-[44px] pointer-events-none md:[&>div]:pointer-events-none">
+                            <LiveTranscription text={transcript} />
+                        </div>
+
+                        {/* 4. Expandable Panels (MOBILE MODAL / DESKTOP FLOATS) */}
+                        {/* Mobile 'Premium' Floating Button */}
+                        <div className="hidden max-[1084px]:block fixed bottom-[90px] right-4 z-[45] pointer-events-auto">
+                            <button
+                                onClick={() => setMobileMenuOpen(true)}
+                                className="group relative overflow-hidden rounded-full border border-cyan-500/50 bg-cyan-950/80 px-4 py-3 shadow-[0_0_20px_rgba(6,182,212,0.4)] backdrop-blur-md transition-all hover:bg-cyan-900 flex items-center gap-2"
+                            >
+                                <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
+                                <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
+                                <span className="relative text-[10px] font-bold uppercase tracking-widest text-cyan-100">
+                                    System Panels
+                                </span>
+                            </button>
+                        </div>
+
+                        {/* Mobile Modal Overlay */}
+                        <AnimatePresence>
+                            {mobileMenuOpen && (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                                    className="hidden max-[1084px]:flex fixed inset-4 top-16 bottom-[90px] z-[60] bg-black/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex-col pointer-events-auto"
+                                >
+                                    <div className="flex justify-between items-center px-4 py-3 border-b border-white/10 bg-white/5 shrink-0">
+                                        <h2 className="text-cyan-400 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-cyan-400"></div> System Access
+                                        </h2>
+                                        <button
+                                            onClick={() => setMobileMenuOpen(false)}
+                                            className="text-slate-400 hover:text-white p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg bg-white/5"
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+                                    <div className="flex border-b border-white/10 bg-white/5 shrink-0">
+                                        <button onClick={() => setMobileTab('logs')} className={`flex-1 py-1 text-[10px] uppercase min-h-[44px] tracking-widest transition-colors border-r border-white/5 ${mobileTab === 'logs' ? 'bg-white/10 text-cyan-200 border-b-2 border-b-cyan-400' : 'text-slate-400'}`}>Logs</button>
+                                        <button onClick={() => setMobileTab('vision')} className={`flex-1 py-1 text-[10px] uppercase min-h-[44px] tracking-widest transition-colors border-r border-white/5 ${mobileTab === 'vision' ? 'bg-white/10 text-cyan-200 border-b-2 border-b-cyan-400' : 'text-slate-400'}`}>Vision</button>
+                                        <button onClick={() => setMobileTab('diagnostics')} className={`flex-1 py-1 text-[10px] uppercase min-h-[44px] tracking-widest transition-colors ${mobileTab === 'diagnostics' ? 'bg-white/10 text-cyan-200 border-b-2 border-b-cyan-400' : 'text-slate-400'}`}>Diag</button>
+                                    </div>
+
+                                    <div className="relative flex-grow overflow-y-auto p-4 pointer-events-auto
+                                        [&_.panel-wrapper>section]:!static [&_.panel-wrapper>section]:!w-full [&_.panel-wrapper>section]:!h-[full] [&_.panel-wrapper>section]:!min-h-[25vh] [&_.panel-wrapper>section]:!transform-none [&_.panel-wrapper>section]:!bg-transparent [&_.panel-wrapper>section]:!border-none [&_.panel-wrapper>section]:!m-0 [&_.panel-wrapper>section]:!bottom-auto [&_.panel-wrapper>section]:!right-auto [&_.panel-wrapper>section]:!left-auto [&_.panel-wrapper>section]:!top-auto [&_.panel-wrapper>section]:!rounded-none
+                                        [&_.panel-wrapper_video]:!h-auto [&_.panel-wrapper_video]:!max-h-[50vh] [&_.panel-wrapper_video]:!object-contain [&_.panel-wrapper_video]:!rounded-xl [&_.panel-wrapper>section]:!max-w-full
+                                        [&_.panel-wrapper_.scanline]:!hidden [&_.panel-wrapper>section>p]:!hidden text-left [&_.panel-wrapper_section>div]:!h-auto
+                                    ">
+                                        <div className={`panel-wrapper h-full w-full ${mobileTab === 'logs' ? 'block' : 'hidden'}`}>
+                                            <ProtocolLogs logs={logs} />
+                                        </div>
+                                        <div className={`panel-wrapper h-full w-full ${mobileTab === 'vision' ? 'block' : 'hidden'}`}>
+                                            <OpticalFeed active={cameraActive} videoRef={videoRef} />
+                                        </div>
+                                        <div className={`panel-wrapper h-full w-full ${mobileTab === 'diagnostics' ? 'block' : 'hidden'}`}>
+                                            <SystemDiagnostics visible={showDiag} metrics={metrics} />
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        {/* Desktop Floating Panels - hidden on mobile entirely */}
+                        <div className="max-[1084px]:hidden w-full px-2 flex flex-col justify-end z-20 min-[1085px]:static pointer-events-none">
+                            <div className="relative w-full z-20 flex-shrink pointer-events-none">
+                                <div className="panel-wrapper h-full w-full pointer-events-auto min-[1085px]:pointer-events-none">
+                                    <ProtocolLogs logs={logs} />
+                                </div>
+                                <div className="panel-wrapper h-full w-full pointer-events-none">
+                                    <OpticalFeed active={cameraActive} videoRef={videoRef} />
+                                </div>
+                                <div className="panel-wrapper h-full w-full pointer-events-auto min-[1085px]:pointer-events-none">
+                                    <SystemDiagnostics visible={showDiag} metrics={metrics} />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Hidden Audio Element */}
+                        <audio ref={audioRef} className="hidden" />
+
+                        {/* Context Help (Hover / Idle) */}
+                        <AnimatePresence>
+                            {(hovering || orbState === "idle") && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 6 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 6 }}
+                                    className="pointer-events-none absolute bottom-[100px] md:bottom-28 left-1/2 z-[60] -translate-x-1/2 whitespace-nowrap rounded-full border border-cyan-500/30 bg-cyan-900/30 shadow-[0_0_15px_rgba(6,182,212,0.2)] px-4 py-2 text-[10px] uppercase tracking-[0.15em] text-cyan-100 backdrop-blur-md animate-pulse sm:px-5 sm:py-2.5 sm:text-xs sm:tracking-[0.2em]"
+                                >
+                                    {orbState === "idle" ? "Tap anywhere to Initialize Mic/Camera" : "Tap to Barge-In · Press X to Halt"}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        {/* 5. BOTTOM INPUT BAR - FIXED */}
+                        <div className="fixed bottom-0 left-0 right-0 px-2 py-2 pb-[env(safe-area-inset-bottom)] z-[40] sm:bottom-6 sm:left-1/2 sm:-translate-x-1/2 sm:w-[min(92vw,28rem)] bg-black/80 backdrop-blur-sm sm:backdrop-blur-xl border-t border-white/10 sm:border sm:rounded-xl pointer-events-auto shadow-[0_-10px_30px_rgba(0,0,0,0.8)] sm:shadow-none">
+                            <div className="flex flex-col sm:flex-row gap-2">
                                 <input
                                     value={promptText}
                                     onChange={(e) => setPromptText(e.target.value)}
@@ -751,42 +853,22 @@ export default function WarRoom() {
                                             setPromptText("");
                                         }
                                     }}
-                                    placeholder="Type prompt · Enter to send · Alt+V vision · Alt+M mute · Alt+T test"
-                                    className="w-full rounded-md border border-white/20 bg-black/30 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-400 focus:border-cyan-300/50 focus:outline-none"
+                                    placeholder="Type prompt · Enter to send · Alt+V vision"
+                                    className="w-full min-h-[44px] rounded-md border border-white/20 bg-black/30 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-400 focus:border-cyan-300/50 focus:outline-none flex-1"
                                 />
                                 <button
                                     onClick={() => {
                                         sendPrompt(promptText);
                                         setPromptText("");
                                     }}
-                                    className="rounded-md border border-cyan-300/40 bg-cyan-500/10 px-3 py-2 text-xs uppercase tracking-[0.12em] text-cyan-200 hover:bg-cyan-500/20"
+                                    className="rounded-md border border-cyan-300/40 bg-cyan-500/10 px-3 py-2 text-xs uppercase tracking-[0.12em] text-cyan-200 hover:bg-cyan-500/20 min-h-[44px] min-w-[44px] sm:w-auto w-full font-semibold max-sm:bg-cyan-900/40 text-center flex items-center justify-center"
                                 >
                                     Send
                                 </button>
                             </div>
                         </div>
-                    )}
 
-                    {/* Subtle immersive logo background */}
-                    <div className="fixed inset-0 flex z-0 pointer-events-none items-center justify-center opacity-[0.03]">
-                        <img src="/logos/full.png" alt="SynAegis Motif" className="w-[1000px] h-[1000px] object-contain grayscale blur-[3px]" />
                     </div>
-                    {/* Subtle immersive logo background */}
-                    <div className="fixed inset-0 flex z-0 pointer-events-none items-center justify-center opacity-[0.03]">
-                        <img src="/logos/full.png" alt="SynAegis Motif" className="w-[1000px] h-[1000px] object-contain grayscale blur-[3px]" />
-                    </div>
-                    <AnimatePresence>
-                        {hovering && (
-                            <motion.div
-                                initial={{ opacity: 0, y: 6 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: 6 }}
-                                className="pointer-events-none absolute bottom-3 left-1/2 z-[60] -translate-x-1/2 whitespace-nowrap rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-[10px] uppercase tracking-[0.15em] text-slate-200 backdrop-blur sm:bottom-6 sm:px-4 sm:py-2 sm:text-xs sm:tracking-[0.2em]"
-                            >
-                                {orbState === "idle" ? "Tap to Initialize Mic/Camera" : "Tap to Barge-In · Press X to Halt"}
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
                 </main>
             )}
         </>
