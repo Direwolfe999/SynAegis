@@ -11,7 +11,7 @@ export const viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'SynAegis | Autonomous DevOps War Room',
+  title: 'SynAegis | Autonomous DevOps Engine',
   description: 'AI-driven operations and orchestration platform',
   manifest: '/manifest.json',
   icons: {
