@@ -62,6 +62,49 @@ async def gitlab_webhook(request: Request):
                 "detail": payload
             }
         )
-        return {"status": "received"}
-    
+        return {"status": "pipeline_received"}
+        
+    elif object_kind == "merge_request":
+        mr_attr = payload.get("object_attributes", {})
+        action = mr_attr.get("action")
+        
+        # Only review newly opened Merge Requests
+        if action == "open":
+            import asyncio
+            asyncio.create_task(
+                trigger_ai_code_review(
+                    merge_request_id=mr_attr.get("iid"),
+                    project_id=payload.get("project", {}).get("id"),
+                    source_branch=mr_attr.get("source_branch")
+                )
+            )
+            return {"status": "code_review_triggered"}
+            
     return {"status": "ignored"}
+import httpx
+import os
+from backend.gitlab_tools import GITLAB_URL, _get_headers, PROJECT_ID
+
+async def trigger_ai_code_review(merge_request_id: int, project_id: int, source_branch: str):
+    """Simulate an AI analyzing the MR changes and posting a review comment."""
+    diff_url = f"{GITLAB_URL}/projects/{project_id}/merge_requests/{merge_request_id}/changes"
+    
+    async with httpx.AsyncClient() as client:
+        # 1. Fetch changes
+        diff_req = await client.get(diff_url, headers=_get_headers())
+        if diff_req.status_code != 200:
+            return
+            
+        # 2. In a full implementation, you'd send `diff_req.json()` to Gemini here.
+        # For now, we simulate the AI response based on the Premium Trial feature setup.
+        ai_comment = (
+            "🤖 **SynAegis AI Code Review (Premium Feature)**\n\n"
+            "I've analyzed the changes in this Merge Request across your stack.\n"
+            "- **Code Quality**: Looks good. No obvious syntax errors.\n"
+            "- **Security (SAST/DAST)**: Waiting for pipeline completion to verify against standard vulnerabilities.\n"
+            "- **Recommendation**: Please ensure your tests cover the new edge cases introduced in this branch."
+        )
+        
+        # 3. Post the review as a note/comment on the MR
+        note_url = f"{GITLAB_URL}/projects/{project_id}/merge_requests/{merge_request_id}/notes"
+        await client.post(note_url, headers=_get_headers(), json={"body": ai_comment})

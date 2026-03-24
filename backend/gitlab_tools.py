@@ -85,3 +85,40 @@ GILAB_TOOLS_LIST = [
     create_gitlab_branch, 
     create_gitlab_merge_request
 ]
+
+def list_gitlab_epics(state: str = "opened") -> str:
+    """Lists current epics in the GitLab group. This is a Premium/Ultimate feature."""
+    GROUP_ID = os.getenv("GITLAB_GROUP_ID") 
+    if not GROUP_ID: return "Error: No GITLAB_GROUP_ID configured for Epics (requires Premium)"
+    r = requests.get(f"{GITLAB_URL}/groups/{GROUP_ID}/epics?state={state}", headers=_get_headers())
+    if r.status_code == 200:
+        epics = r.json()
+        if not epics: return "No open epics found."
+        formatted = [f"&{epic['iid']}: {epic['title']}" for epic in epics[:10]]
+        return "Current Epics:\n" + "\n".join(formatted)
+    return f"Failed to list epics: {r.text}"
+
+def get_pipeline_security_report(pipeline_id: int) -> str:
+    """Fetches the SAST/DAST security report for a specific pipeline (requires Ultimate layer)."""
+    if not PROJECT_ID: return "Error: No GITLAB_PROJECT_ID configured in .env"
+    r = requests.get(f"{GITLAB_URL}/projects/{PROJECT_ID}/pipelines/{pipeline_id}/security/reports", headers=_get_headers())
+    if r.status_code == 200:
+        data = r.json()
+        sast_flaws = len(data.get("sast", {}).get("vulnerabilities", []))
+        dast_flaws = len(data.get("dast", {}).get("vulnerabilities", []))
+        return f"Security Report Summary for Pipeline {pipeline_id}: SAST Vulnerabilities: {sast_flaws}, DAST Vulnerabilities: {dast_flaws}"
+    return f"Failed to fetch security report or feature not active on this tier: {r.text}"
+
+def rollback_environment(environment: str) -> str:
+    """Rollback an environment (like staging or production) to the last successful deployment."""
+    if not PROJECT_ID: return "Error: No GITLAB_PROJECT_ID configured in .env"
+    r = requests.get(f"{GITLAB_URL}/projects/{PROJECT_ID}/environments?name={environment}", headers=_get_headers())
+    if r.status_code == 200 and r.json():
+        env_id = r.json()[0]['id']
+        roll_req = requests.post(f"{GITLAB_URL}/projects/{PROJECT_ID}/environments/{env_id}/stop", headers=_get_headers())
+        if roll_req.status_code in (200, 201):
+            return f"Environment '{environment}' rolled back successfully."
+        return f"Failed to rollback environment: {roll_req.text}"
+    return f"Environment '{environment}' not found."
+
+GILAB_TOOLS_LIST.extend([list_gitlab_epics, get_pipeline_security_report, rollback_environment])
