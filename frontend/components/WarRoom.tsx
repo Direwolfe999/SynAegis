@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useToast } from "./ToastProvider";
+import { WS_BASE } from "../lib/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import SynAegisOrb, { type OrbState } from "../components/SynAegisOrb";
@@ -154,10 +155,7 @@ export default function WarRoom() {
         backendModeRef.current = backendMode;
     }, [backendMode]);
 
-    const wsUrl = useMemo(() => {
-        const fallback = "wss://synaegis-backend.onrender.com/ws/warroom";
-        return process.env.NEXT_PUBLIC_BACKEND_WS_URL || fallback;
-    }, []);
+    const wsUrl = `${WS_BASE}/warroom`;
 
     const pushLog = useCallback((line: string) => {
         const msg = `${new Date().toLocaleTimeString()} [INFO] ${line}`;

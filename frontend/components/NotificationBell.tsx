@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Bell, ShieldAlert, CheckCircle, Info, Activity } from "lucide-react";
 import { useToast } from "./ToastProvider";
+import { API_BASE } from "../lib/api";
 
 export function NotificationBell({ darkMode }: { darkMode?: boolean }) {
     const [notifications, setNotifications] = useState<any[]>([]);
@@ -26,7 +27,7 @@ export function NotificationBell({ darkMode }: { darkMode?: boolean }) {
             try {
                 // In a real app we fetch from /api/notifications
                 // Assuming we use our generic fetcher or mock it for now since backend might not have the route yet
-                const res = await fetch("http://localhost:8080/api/notifications/recent").catch(() => null);
+                const res = await fetch(`${API_BASE}/notifications/recent`).catch(() => null);
                 if (res && res.ok) {
                     const data = await res.json();
                     setNotifications(data.notifications || []);
@@ -56,7 +57,7 @@ export function NotificationBell({ darkMode }: { darkMode?: boolean }) {
         setNotifications(notifications.map(n => ({...n, read: true})));
         // Call backend to mark read
         try {
-            await fetch("http://localhost:8080/api/notifications/mark_read", { method: 'POST' }).catch(() => null);
+            await fetch(`${API_BASE}/notifications/mark_read`, { method: 'POST' }).catch(() => null);
         } catch (e) {}
     };
 
