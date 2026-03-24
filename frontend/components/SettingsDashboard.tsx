@@ -6,6 +6,7 @@ import {
   Eye, EyeOff, ChevronRight, Save, LogOut, Laptop, Plus, Trash2, Mail
 } from "lucide-react";
 import { useToast } from "./ToastProvider";
+import PWAInstallButton from "./PWAInstallButton";
 import {
   fetchProfile, updateProfile, fetchApiKeys, createApiKey, revokeApiKey,
   fetchIntegrations, addIntegration, rmdIntegration, fetchPreferences, updatePreferences, updateSecurity
@@ -243,7 +244,16 @@ const ToggleSwitch = ({ label, description, checked, onChange, darkMode }: any) 
 
 /* --- Profile Settings --- */
 const ProfileSettings = ({ darkMode, profile, setProfile, avatarPreview, setAvatarPreview, fileInputRef, addToast }: any) => (
+  
   <div className="space-y-6 md:space-y-8">
+    <div className={`p-4 rounded-xl border flex items-center justify-between ${darkMode ? "bg-cyan-950/20 border-cyan-500/30" : "bg-cyan-50 border-cyan-200"}`}>
+      <div>
+        <h3 className={`text-sm font-semibold mb-1 ${darkMode ? "text-cyan-400" : "text-cyan-700"}`}>Install Desktop App</h3>
+        <p className={`text-xs ${darkMode ? "text-cyan-200/60" : "text-cyan-600/80"}`}>Get the native offline experience with push notifications.</p>
+      </div>
+      <PWAInstallButton />
+    </div>
+
     <div>
       <h2 className="text-xl font-semibold mb-1">Personal Information</h2>
       <p className={`text-sm ${darkMode ? "text-slate-400" : "text-slate-500"}`}>Update your photo and platform identity.</p>

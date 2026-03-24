@@ -103,3 +103,30 @@ input, textarea, code, pre, [contenteditable="true"], .allow-select {
   user-select: text !important;
   -webkit-user-select: text !important;
 }
+
+#splash-screen {
+  position: fixed;
+  inset: 0;
+  background: #050505;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  transition: opacity 0.5s ease-out;
+}
+
+#splash-screen.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#splash-screen img {
+  width: 80px;
+  height: auto;
+  animation: pulse-splash 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse-splash {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+}

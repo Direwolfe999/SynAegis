@@ -1,21 +1,23 @@
 {
-  "name": "SynAegis Cloud Command",
+  "name": "SynAegis",
   "short_name": "SynAegis",
-  "description": "Enterprise-grade autonomous cloud control system.",
+  "description": "SynAegis Security Platform",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#050505",
-  "theme_color": "#000000",
+  "theme_color": "#050505",
+  "orientation": "portrait",
   "icons": [
     {
-      "src": "/logos/icon-192x192.png",
+      "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/logos/icon-512x512.png",
+      "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }

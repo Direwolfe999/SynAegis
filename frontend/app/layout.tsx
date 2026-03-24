@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   icons: {
     icon: '/logos/favicon.png',
     shortcut: '/logos/favicon.png',
-    apple: '/logos/favicon.png',
+    apple: '/apple-touch-icon.png',
   },
   appleWebApp: {
     title: 'SynAegis',
@@ -50,6 +50,38 @@ export default function RootLayout({
             `
           }} />
         </div>
+        
+        <div id="splash-screen" suppressHydrationWarning>
+          <img src="/logos/logo.png" alt="logo" />
+        </div>
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            window.addEventListener("load", () => {
+              const splash = document.getElementById("splash-screen");
+              if(splash) {
+                splash.classList.add("fade-out");
+                setTimeout(() => splash.remove(), 500);
+              }
+            });
+          `
+        }} />
+
+        
+        <div id="splash-screen" suppressHydrationWarning>
+          <img src="/logos/logo.png" alt="logo" />
+        </div>
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            window.addEventListener("load", () => {
+              const splash = document.getElementById("splash-screen");
+              if(splash) {
+                splash.classList.add("fade-out");
+                setTimeout(() => splash.remove(), 500);
+              }
+            });
+          `
+        }} />
+
         <ProductionGuard />
         {children}
       </body>

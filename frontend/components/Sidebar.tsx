@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+
 const navConfig = {
   default: [
     { id: 'dashboard', icon: '📊', label: 'Dashboard' },
