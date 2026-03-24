@@ -79,7 +79,7 @@ function DashboardContent() {
                     {(activeView !== "warroom" && activeView !== "pipelines" && activeView !== "security" && activeView !== "cloud" && activeView !== "settings" && activeView !== "devops") && <FloatingActions addToast={addToast} />}
 
                     {/* Main Content Area - padded left for sidebar */}
-                    <div className={`flex-1 transition-all duration-300 ${activeView !== 'warroom' && activeView !== 'pipelines' && activeView !== 'security' && activeView !== 'cloud' && activeView !== 'settings' && activeView !== 'devops' ? 'mb-20 md:ml-20 md:mb-0' : ''}`}>
+                    <div className={`flex-1 min-w-0 transition-all duration-300 ${activeView !== 'warroom' && activeView !== 'pipelines' && activeView !== 'security' && activeView !== 'cloud' && activeView !== 'settings' && activeView !== 'devops' ? 'mb-20 md:ml-20 md:mb-0' : ''}`}>
                         {/* Background Effects */}
                         <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_10%,rgba(6,182,212,0.15),transparent_50%)] pointer-events-none" />
                         <div className="fixed inset-0 flex z-0 pointer-events-none items-center justify-center opacity-[0.05]">
@@ -87,22 +87,21 @@ function DashboardContent() {
                         </div>
                         <div className="fixed inset-0 pointer-events-none opacity-20 z-0" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '50px 50px' }} />
 
-                        {activeView === "warroom" || activeView === "pipelines" || activeView === "security" ? (
-                            renderSecondaryView()
-                        ) : (
-                            <div className="relative z-10 mx-auto max-w-[1500px] px-4 py-8 mb-32 sm:px-8 flex flex-col gap-8">
-                                {/* Breadcrumbs for internal navigation */}
-                                <div className="flex items-center gap-2 text-xs font-mono text-slate-500 tracking-widest pl-2">
-                                    <span className="hover:text-cyan-400 cursor-pointer transition-colors" onClick={() => setActiveView('dashboard')}>SYNAEGIS</span>
-                                    <span>/</span>
-                                    <span className="text-cyan-300 uppercase">{activeView}</span>
-                                </div>
-
+                        <div className="min-h-screen w-full bg-[#050505] text-white">
+                            <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-10 py-8 mb-32 flex flex-col gap-8">
+                                {activeView !== "dashboard" && activeView !== "warroom" && (
+                                    <div className="flex items-center gap-2 text-xs font-mono text-slate-500 tracking-widest px-2">
+                                        <span className="hover:text-cyan-400 cursor-pointer transition-colors" onClick={() => setActiveView('dashboard')}>SYNAEGIS</span>
+                                        <span>/</span>
+                                        <span className="text-cyan-300 uppercase">{activeView}</span>
+                                    </div>
+                                )}
+                                
                                 {activeView !== "dashboard" ? renderSecondaryView() : (
                                     <GlobalCommandDashboard setActiveView={setActiveView} />
                                 )}
                             </div>
-                        )}
+                        </div>
                     </div>
                 </main>
             )}

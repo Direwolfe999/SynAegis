@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useToast } from "./ToastProvider";
+import { NotificationBell } from "./NotificationBell";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Server, Cpu, Activity, DollarSign, Leaf, Bell, Sun, Moon,

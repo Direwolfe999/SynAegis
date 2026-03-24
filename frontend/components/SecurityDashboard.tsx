@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 
 import { API_BASE, WS_BASE } from "../lib/api";
 import { useToast } from "./ToastProvider";
+import { NotificationBell } from "./NotificationBell";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Shield, ShieldAlert, ShieldCheck, Activity, Bell, Sun, Moon,

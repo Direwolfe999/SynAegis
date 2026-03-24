@@ -818,7 +818,7 @@ export default function WarRoom() {
                                             <ProtocolLogs logs={logs} />
                                         </div>
                                         <div className={`panel-wrapper h-full w-full ${mobileTab === 'vision' ? 'block' : 'hidden'}`}>
-                                            <OpticalFeed active={cameraActive} videoRef={videoRef} />
+                                            <OpticalFeed active={cameraActive} videoRef={videoRef} inline={true} />
                                         </div>
                                         <div className={`panel-wrapper h-full w-full ${mobileTab === 'diagnostics' ? 'block' : 'hidden'}`}>
                                             <SystemDiagnostics visible={showDiag} metrics={metrics} />

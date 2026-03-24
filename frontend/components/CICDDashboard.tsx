@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "./ToastProvider";
+import { NotificationBell } from "./NotificationBell";
 import { 
     Activity, Clock, AlertCircle, CheckCircle, XCircle, Terminal, 
     Search, Play, Square, RotateCcw, Filter, ChevronDown, ChevronUp,
