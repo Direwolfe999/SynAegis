@@ -284,10 +284,27 @@ export default function WarRoom() {
     const startMedia = useCallback(async () => {
         try {
             await teardownMedia(); // Prevent duplicate streams if called twice
-            const stream = await navigator.mediaDevices.getUserMedia({
-                audio: { sampleRate: 16000, channelCount: 1, noiseSuppression: true, echoCancellation: true },
-                video: { width: { ideal: 960 }, height: { ideal: 540 }, frameRate: { ideal: 20, max: 24 } },
-            });
+            
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                console.error("Media devices API not available. Check HTTPS / secure context.");
+                pushLog("[ERROR] Camera/Mic blocked by browser. Require HTTPS or localhost.");
+                return;
+            }
+
+            let stream: MediaStream;
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    audio: { sampleRate: 16000, channelCount: 1, noiseSuppression: true, echoCancellation: true },
+                    video: { width: { ideal: 960 }, height: { ideal: 540 }, frameRate: { ideal: 20, max: 24 } },
+                });
+            } catch (videoErr) {
+                console.warn("Failed to get video+audio, falling back to audio only:", videoErr);
+                pushLog("[WARNING] Video feed failed. Falling back to Audio-only.");
+                stream = await navigator.mediaDevices.getUserMedia({
+                    audio: { sampleRate: 16000, channelCount: 1, noiseSuppression: true, echoCancellation: true },
+                    video: false,
+                });
+            }
 
             mediaRef.current = stream;
             setCameraActive(true);
@@ -333,7 +350,7 @@ export default function WarRoom() {
             console.error("Media Error:", err);
             setCameraActive(false);
         }
-    }, [sendJson, teardownMedia]);
+    }, [sendJson, teardownMedia, pushLog]);
 
     const connect = useCallback(async () => {
         if (wsRef.current?.readyState === WebSocket.OPEN || wsRef.current?.readyState === WebSocket.CONNECTING) return;
@@ -345,6 +362,9 @@ export default function WarRoom() {
             wsRef.current = null;
         }
 
+        // Initialize media synchronously tied to user click, while connecting to WebSocket simultaneously
+        const mediaPromise = startMedia();
+
         manualDisconnectRef.current = false;
         setOrbState("reconnecting");
         const ws = new WebSocket(wsUrl);
@@ -353,7 +373,7 @@ export default function WarRoom() {
         ws.onopen = async () => {
             reconnectAttemptsRef.current = 0;
             pushLog("Realtime link established.");
-            await startMedia();
+            await mediaPromise;
             setOrbState("listening");
         };
 

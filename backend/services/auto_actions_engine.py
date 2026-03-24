@@ -36,8 +36,8 @@ class AutoActionEngine:
                 cloud = await cloud_overview()
                 security = await security_overview()
                 
-                # Only hit external gitlab API every 6th tick (~30s) to avoid rate limits
-                if loop_counter % 6 == 1 or loop_counter == 1:
+                # Only hit external gitlab API every 2nd tick (~10s) to be snappier for the demo
+                if loop_counter % 2 == 1 or loop_counter == 1:
                     pipelines_cache = await get_pipeline_stats()
                 pipelines = pipelines_cache
                 

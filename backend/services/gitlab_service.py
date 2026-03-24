@@ -15,9 +15,12 @@ HEADERS = {"PRIVATE-TOKEN": GITLAB_TOKEN} if GITLAB_TOKEN else {}
 MOCK_PIPELINES = []
 
 async def get_pipeline_stats():
+    mock_running = len([p for p in MOCK_PIPELINES if p.get('status') == 'running' or p.get('status') == 'pending'])
+    mock_total = len(MOCK_PIPELINES)
+
     if not GITLAB_TOKEN or not GITLAB_PROJECT_ID:
-        logger.warning("GITLAB_TOKEN or GITLAB_PROJECT_ID missing. Returning 0.")
-        return {"running": 0, "total": 0}
+        logger.warning("GITLAB_TOKEN or GITLAB_PROJECT_ID missing. Returning mock data only.")
+        return {"running": mock_running, "total": mock_total, "failed": 0}
     
     try:
         async with httpx.AsyncClient() as client:
@@ -27,13 +30,19 @@ async def get_pipeline_stats():
             )
             if res.status_code == 200:
                 pipelines = res.json()
-                running = len([p for p in pipelines if p.get('status') == 'running'])
-                return {"running": running, "total": len(pipelines)}
+                running = len([p for p in pipelines if p.get('status') in ('running', 'pending')])
+                failed = len([p for p in pipelines if p.get('status') == 'failed'])
+                return {
+                    "running": running + mock_running, 
+                    "total": len(pipelines) + mock_total,
+                    "failed": failed
+                }
             else:
                 logger.error(f"GitLab API Error {res.status_code}: {res.text}")
     except Exception as e:
         logger.error(f"Failed to fetch pipeline stats: {e}")
-    return {"running": 0, "total": 0}
+    
+    return {"running": mock_running, "total": mock_total, "failed": 0}
 
 async def get_all_pipelines():
     pipeline_data = list(MOCK_PIPELINES) # Inject the simulated pipelines first

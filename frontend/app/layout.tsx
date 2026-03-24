@@ -32,21 +32,24 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className="antialiased font-sans text-slate-800 bg-white dark:text-slate-100 dark:bg-[#050505] transition-colors duration-500">
-        <script dangerouslySetInnerHTML={{
-          __html: `
-            if ('serviceWorker' in navigator) {
-              window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/sw.js').then(function(registration) {
-                  console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                }, function(err) {
-                  console.log('ServiceWorker registration failed: ', err);
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <body className="antialiased font-sans text-slate-800 bg-white dark:text-slate-100 dark:bg-[#050505] transition-colors duration-500" suppressHydrationWarning>
+        {/* Empty div wrapper blocks extensions from replacing our script tag by mistake */}
+        <div suppressHydrationWarning>
+          <script dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                  }, function(err) {
+                    console.log('ServiceWorker registration failed: ', err);
+                  });
                 });
-              });
-            }
-          `
-        }} />
+              }
+            `
+          }} />
+        </div>
         <ProductionGuard />
         {children}
       </body>
