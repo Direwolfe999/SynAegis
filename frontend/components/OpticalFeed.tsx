@@ -7,7 +7,7 @@ type Props = {
     videoRef: React.RefObject<HTMLVideoElement | null>;
     inline?: boolean;
 };
-
+// Exported the video field for proper alignment
 export default function OpticalFeed({ active, videoRef, inline = false }: Props) {
     return (
         <AnimatePresence>

@@ -50,35 +50,28 @@ export default function RootLayout({
             `
           }} />
         </div>
-        
-        <div id="splash-screen" suppressHydrationWarning>
-          <img src="/logos/logo.png" alt="logo" />
-        </div>
-        <script dangerouslySetInnerHTML={{
-          __html: `
-            window.addEventListener("load", () => {
-              const splash = document.getElementById("splash-screen");
-              if(splash) {
-                splash.classList.add("fade-out");
-                setTimeout(() => splash.remove(), 500);
-              }
-            });
-          `
-        }} />
 
-        
         <div id="splash-screen" suppressHydrationWarning>
           <img src="/logos/logo.png" alt="logo" />
         </div>
         <script dangerouslySetInnerHTML={{
           __html: `
-            window.addEventListener("load", () => {
+            function removeSplash() {
               const splash = document.getElementById("splash-screen");
-              if(splash) {
+              if (splash) {
                 splash.classList.add("fade-out");
-                setTimeout(() => splash.remove(), 500);
+                setTimeout(() => {
+                  try { splash.remove(); } catch(e) {}
+                }, 500);
               }
-            });
+            }
+            if (document.readyState === 'complete') {
+              removeSplash();
+            } else {
+              window.addEventListener('load', removeSplash);
+              // Fallback just in case load is blocked
+              setTimeout(removeSplash, 2000); 
+            }
           `
         }} />
 
