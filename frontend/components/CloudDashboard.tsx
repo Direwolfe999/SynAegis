@@ -90,8 +90,9 @@ export default function CloudDashboard({ onBack }: { onBack: () => void }) {
                     
                     // AI Self-Healing Trigger
                     if (newCpu > 95 && Math.random() > 0.7 && s.id !== activeAction?.split('-')[1]) {
-                        // AI triggers scale automatically
-                        setTimeout(() => handleAction('scale', s.id, true), 500);
+                        if (aiMode === 'Auto') {
+                            setTimeout(() => handleAction('scale', s.id, true), 500);
+                        }
                     }
                     
                     return { ...s, cpu: newCpu, status: newStatus };
@@ -101,6 +102,31 @@ export default function CloudDashboard({ onBack }: { onBack: () => void }) {
         }, 4000);
         return () => clearInterval(interval);
     }, [aiMode, activeAction]);
+
+
+    // Deploy Animation State
+    const [showDeployOverlay, setShowDeployOverlay] = useState(false);
+    const [deployStep, setDeployStep] = useState(0);
+
+    // AI Action State
+    const [showAiOverlay, setShowAiOverlay] = useState(false);
+    const [aiActionConfig, setAiActionConfig] = useState({ title: '', desc: '', action: '', id: '' });
+    const [aiStep, setAiStep] = useState(0);
+
+    const startDeploy = () => {
+        setShowDeployOverlay(true);
+        setDeployStep(0);
+        let step = 0;
+        const timer = setInterval(() => { step++; setDeployStep(step); if (step >= 4) { clearInterval(timer); setTimeout(() => { setShowDeployOverlay(false); addToast("Successfully deployed to GitLab & Production!", "success"); }, 2000); } }, 1200);
+    };
+
+    const startAiAction = (title: string, desc: string, action: string, id: string) => {
+        setAiActionConfig({ title, desc, action, id });
+        setShowAiOverlay(true);
+        setAiStep(0);
+        let step = 0;
+        const timer = setInterval(() => { step++; setAiStep(step); if (step >= 4) { clearInterval(timer); setTimeout(() => { handleAction(action, id); setShowAiOverlay(false); addToast(`AI successfully executed: ${title}`, "success"); }, 1500); } }, 1200);
+    };
 
     const handleAction = (action: string, id: string, autoTriggered = false) => {
         const service = services.find(s => s.id === id);
@@ -256,9 +282,7 @@ export default function CloudDashboard({ onBack }: { onBack: () => void }) {
                                         <Search className="w-4 h-4 text-slate-400" />
                                         <input type="text" placeholder="Search services..." className="bg-transparent border-none outline-none text-sm w-32 focus:ring-0" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                                     </div>
-                                    <button className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded-lg text-sm font-medium transition-colors shadow-lg shadow-blue-500/20 flex items-center gap-2">
-                                        <Play className="w-4 h-4" fill="currentColor" /> Deploy
-                                    </button>
+                                    <button onClick={startDeploy} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded-lg text-sm font-medium transition-colors shadow-lg shadow-blue-500/20 flex items-center gap-2 group relative overflow-hidden"><div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform"></div><Play className="w-4 h-4 relative z-10" fill="currentColor" /> <span className="relative z-10">Deploy</span></button>
                                 </div>
                             </div>
 
@@ -458,7 +482,7 @@ export default function CloudDashboard({ onBack }: { onBack: () => void }) {
                                             <div className="flex-1">
                                                 <h4 className="text-xs font-bold text-slate-200 mb-1 flex items-center gap-2">Cost Optimization <span className="text-[9px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded">98% Match</span></h4>
                                                 <p className="text-[11px] text-slate-400 leading-relaxed mb-2">Data Ingestion Worker has been idle for 72 hours. Terminate to save $80/month.</p>
-                                                <button className="mt-2 text-xs uppercase tracking-wider font-bold text-emerald-400 hover:text-emerald-300 transition-colors min-h-[36px] bg-emerald-500/10 px-3 rounded w-full flex items-center justify-center gap-2" onClick={() => handleAction('decommission', 'srv-4')}>Execute Action</button>
+                                                <button className="mt-2 text-xs uppercase tracking-wider font-bold text-emerald-400 hover:text-emerald-300 transition-colors min-h-[36px] bg-emerald-500/10 px-3 rounded w-full flex items-center justify-center gap-2" onClick={() => startAiAction('Decommission Idle Worker', 'Terminating redundant instances to minimize cost', 'decommission', 'srv-4')}>Execute Action</button>
                                             </div>
                                         </div>
                                         <div className={`p-4 md:p-3 rounded-xl border flex gap-4 md:gap-3 transition-all hover:-translate-y-0.5 hover:shadow-lg ${darkMode ? "bg-black/30 border-white/5 hover:border-amber-500/30 hover:shadow-amber-500/10" : "bg-white border-slate-200"}`}>
@@ -466,7 +490,7 @@ export default function CloudDashboard({ onBack }: { onBack: () => void }) {
                                             <div className="flex-1">
                                                 <h4 className="text-xs font-bold text-slate-200 mb-1 flex items-center gap-2">Performance Risk <span className="text-[9px] bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded">85% Match</span></h4>
                                                 <p className="text-[11px] text-slate-400 leading-relaxed mb-2">Redis Cache is consistently hitting 95% CPU during peak hours. Recommend horizontal scaling.</p>
-                                                <button className="mt-2 text-xs uppercase tracking-wider font-bold text-amber-400 hover:text-amber-300 transition-colors min-h-[36px] bg-amber-500/10 px-3 rounded w-full flex items-center justify-center gap-2" onClick={() => handleAction('scale', 'srv-3')}>Auto-Scale Nodes</button>
+                                                <button className="mt-2 text-xs uppercase tracking-wider font-bold text-amber-400 hover:text-amber-300 transition-colors min-h-[36px] bg-amber-500/10 px-3 rounded w-full flex items-center justify-center gap-2" onClick={() => startAiAction('Auto-Scale Redis Nodes', 'Scaling horizontally to mitigate CPU threshold breach', 'scale', 'srv-3')}>Auto-Scale Nodes</button>
                                             </div>
                                         </div>
                                     </motion.div>
@@ -500,6 +524,56 @@ export default function CloudDashboard({ onBack }: { onBack: () => void }) {
                     </div>
                 </div>
             </main>
+
+            <AnimatePresence>
+                {showDeployOverlay && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex flex-col items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+                        <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0 }} className="w-full max-w-lg bg-[#050505] border border-blue-500/30 rounded-2xl shadow-[0_0_50px_rgba(59,130,246,0.15)] overflow-hidden flex flex-col">
+                            <div className="p-5 border-b border-white/5 bg-blue-900/10 flex items-center gap-3">
+                                <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400"><Share2 className="w-5 h-5 animate-pulse" /></div>
+                                <div><h3 className="text-white font-semibold flex items-center gap-2">Deployment Sequence <span className="flex h-2 w-2 rounded-full bg-blue-500 animate-ping"></span></h3><p className="text-xs text-blue-400 font-mono mt-0.5">Target: GitLab &gt; Web Cluster Pipeline</p></div>
+                            </div>
+                            <div className="p-8 flex flex-col gap-8 relative">
+                                <div className="flex justify-between items-center relative z-10 px-4">
+                                    <div className="absolute top-1/2 left-8 right-8 h-0.5 bg-slate-800 -z-10"><motion.div className="h-full bg-blue-500 shadow-[0_0_10px_#3b82f6]" initial={{ width: "0%" }} animate={{ width: `${(deployStep / 3) * 100}%` }} transition={{ duration: 0.5 }} /></div>
+                                    {[{ i: 0, label: "Bundling", icon: Layers }, { i: 1, label: "GitLab", icon: Network }, { i: 2, label: "Building", icon: HardDrive }, { i: 3, label: "Live", icon: Zap }].map((s) => (
+                                        <div key={s.i} className="flex flex-col items-center gap-2"><div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500 ${deployStep >= s.i ? 'bg-blue-500 text-white border-2 border-blue-300 shadow-[0_0_15px_#3b82f6]' : 'bg-slate-800 border-2 border-slate-700 text-slate-500'}`}><s.icon className="w-4 h-4" /></div><span className={`text-[10px] uppercase tracking-wider font-bold ${deployStep >= s.i ? 'text-blue-400' : 'text-slate-600'}`}>{s.label}</span></div>
+                                    ))}
+                                </div>
+                                <div className="bg-black border border-white/5 rounded-lg p-4 font-mono text-[11px] h-36 overflow-hidden flex flex-col justify-end relative shadow-inner">
+                                    <div className="absolute inset-0 bg-gradient-to-b from-black to-transparent pointer-events-none z-10 h-8"></div>
+                                    <div className="space-y-1.5 text-slate-400 z-0 flex flex-col justify-end h-full">
+                                        {deployStep >= 0 && <motion.div initial={{opacity:0, x:-5}} animate={{opacity:1, x:0}} className="text-slate-500">[System] Initializing automated deploy pipeline...</motion.div>}
+                                        {deployStep >= 1 && <motion.div initial={{opacity:0, x:-5}} animate={{opacity:1, x:0}} className="text-blue-400">[GitLab] Pushing compiled artifact to main-branch...</motion.div>}
+                                        {deployStep >= 2 && <motion.div initial={{opacity:0, x:-5}} animate={{opacity:1, x:0}} className="text-amber-400">[Docker] Generating localized containers...</motion.div>}
+                                        {deployStep >= 3 && <motion.div initial={{opacity:0, x:-5}} animate={{opacity:1, x:0}} className="text-emerald-400 font-bold">[Success] Deployment replicated and live globally!</motion.div>}
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+                {showAiOverlay && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+                        <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0 }} className="w-full max-w-sm bg-[#050505] border border-emerald-500/30 rounded-2xl shadow-[0_0_50px_rgba(16,185,129,0.1)] overflow-hidden flex flex-col relative">
+                            <div className="absolute -inset-40 bg-emerald-500/10 blur-[100px] pointer-events-none rounded-full" />
+                            <div className="p-8 relative z-10 flex flex-col items-center text-center gap-5">
+                                <div className="relative">
+                                    <div className="absolute inset-0 bg-emerald-500/30 rounded-full animate-ping"></div>
+                                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.5)] relative z-10"><Sparkles className="w-8 h-8 text-white" /></div>
+                                </div>
+                                <div><h3 className="text-xl font-bold text-white mb-2">{aiActionConfig.title}</h3><p className="text-sm text-slate-400 leading-relaxed">{aiActionConfig.desc}</p></div>
+                                <div className="w-full mt-2 bg-black/50 rounded-xl p-4 border border-white/5 space-y-3 shadow-inner">
+                                    <div className="flex justify-between items-center"><span className="text-xs text-slate-400 uppercase font-mono">Telemetry Data</span>{aiStep >= 1 ? <span className="text-xs font-bold text-emerald-400">Processed</span> : <span className="text-xs text-amber-500 animate-pulse font-bold">Scanning...</span>}</div>
+                                    <div className="flex justify-between items-center"><span className="text-xs text-slate-400 uppercase font-mono">Resource Delta</span>{aiStep >= 2 ? <span className="text-xs font-bold text-emerald-400">Calculated</span> : (aiStep === 1 ? <span className="text-xs text-amber-500 animate-pulse font-bold">Solving...</span> : <span className="text-xs text-slate-700">Awaiting</span>)}</div>
+                                    <div className="flex justify-between items-center"><span className="text-xs text-slate-400 uppercase font-mono">Live Patching</span>{aiStep >= 3 ? <span className="text-xs font-bold text-emerald-400">Success</span> : (aiStep === 2 ? <span className="text-xs text-amber-500 animate-pulse font-bold">Executing...</span> : <span className="text-xs text-slate-700">Awaiting</span>)}</div>
+                                </div>
+                                <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mt-1"><motion.div className="h-full bg-emerald-500" initial={{ width: "0%" }} animate={{ width: `${(aiStep / 3) * 100}%` }} transition={{ duration: 0.5 }} /></div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
