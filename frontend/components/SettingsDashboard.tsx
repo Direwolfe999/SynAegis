@@ -4,8 +4,10 @@ import {
   User, Lock, Link as LinkIcon, Key, Bell, Palette, Settings2,
   Moon, Sun, Camera, Shield, Smartphone, Globe, Copy, Check,
   Eye, EyeOff, ChevronRight, Save, LogOut, Laptop, Plus, Trash2, Mail
+  , Fingerprint
 } from "lucide-react";
 import { useToast } from "./ToastProvider";
+import { useTheme } from "./ThemeProvider";
 import PWAInstallButton from "./PWAInstallButton";
 import {
   fetchProfile, updateProfile, fetchApiKeys, createApiKey, revokeApiKey,
@@ -18,16 +20,16 @@ type Prefs = { theme: string; ui_density: string; default_ai_model: string; log_
 export default function SettingsDashboard({ onBack }: { onBack: () => void }) {
   const [activeTab, setActiveTab] = useState("profile");
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [darkMode, setDarkMode] = useState(true);
+  const { isDarkMode: darkMode, toggleTheme, setDarkMode } = useTheme();
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const { addToast, showModal } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [profile, setProfile] = useState<Profile>({ first_name: '', last_name: '', email: '', bio: '' });
   const [originalProfile, setOriginalProfile] = useState<Profile>({ first_name: '', last_name: '', email: '', bio: '' });
-  
+
   const [prefs, setPrefs] = useState<Prefs>({ theme: 'dark', ui_density: 'Comfortable', default_ai_model: 'Gemini 1.5 Pro', log_retention: '30 Days', notifications: {} });
   const [originalPrefs, setOriginalPrefs] = useState<Prefs>({ theme: 'dark', ui_density: 'Comfortable', default_ai_model: 'Gemini 1.5 Pro', log_retention: '30 Days', notifications: {} });
 
@@ -36,9 +38,9 @@ export default function SettingsDashboard({ onBack }: { onBack: () => void }) {
     try {
       const [prof, p] = await Promise.all([fetchProfile(), fetchPreferences()]);
       if (prof) { setProfile(prof); setOriginalProfile(prof); }
-      if (p) { 
-        setPrefs(p); setOriginalPrefs(p); 
-        setDarkMode(p.theme === 'dark'); 
+      if (p) {
+        setPrefs(p); setOriginalPrefs(p);
+        setDarkMode(p.theme === 'dark');
       }
       const a = localStorage.getItem("avatar");
       if (a) setAvatarPreview(a);
@@ -94,7 +96,7 @@ export default function SettingsDashboard({ onBack }: { onBack: () => void }) {
 
   if (isLoading) {
     return (
-      <div className={`min-h-screen w-full flex items-center justify-center ${darkMode ? "bg-[#050505]" : "bg-slate-50"}`}>
+      <div className={`min-h-screen w-full flex items-center justify-center ${darkMode ? "transparent" : "transparent"}`}>
         <div className="flex flex-col items-center gap-4">
           <div className="w-8 h-8 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
           <p className={`text-sm ${darkMode ? "text-slate-400" : "text-slate-500"}`}>Loading Settings...</p>
@@ -105,7 +107,7 @@ export default function SettingsDashboard({ onBack }: { onBack: () => void }) {
 
   return (
     <div className={`w-full flex flex-col font-sans transition-all duration-500 ease-in-out bg-transparent`}>
-      <header className={`sticky top-0 z-50 py-4 flex items-center justify-between border-b backdrop-blur-xl -mx-4 sm:-mx-6 lg:-mx-10 px-4 sm:px-6 lg:px-10 ${darkMode ? "border-white/10 bg-[#050505]/70" : "border-slate-200 bg-white/80"}`}>
+      <header className={`sticky top-0 z-50 py-4 flex items-center justify-between border-b backdrop-blur-xl -mx-4 sm:-mx-6 lg:-mx-10 px-4 sm:px-6 lg:px-10 ${darkMode ? "border-white/10 transparent/70" : "border-slate-200 bg-white/80"}`}>
         <div className="flex items-center gap-4 md:gap-6">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
@@ -121,18 +123,18 @@ export default function SettingsDashboard({ onBack }: { onBack: () => void }) {
         </div>
         <div className="flex items-center gap-4">
           <button onClick={() => {
-              const newMode = !darkMode;
-              setDarkMode(newMode);
-              setPrefs({...prefs, theme: newMode ? 'dark' : 'light'});
-              updatePreferences({ ...prefs, theme: newMode ? 'dark' : 'light' });
-            }} 
-            className="p-2 rounded-full hover:bg-slate-500/10 transition-colors"
+            toggleTheme();
+            const newMode = !darkMode;
+            setPrefs({ ...prefs, theme: newMode ? 'dark' : 'light' });
+            updatePreferences({ ...prefs, theme: newMode ? 'dark' : 'light' });
+          }}
+            className="p-2 rounded-full hover:transparent0/10 transition-colors"
             aria-label="Toggle Theme"
           >
             {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </button>
           <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-400 to-indigo-400 border-2 border-[#050505] shadow-sm flex items-center justify-center overflow-hidden">
-             {avatarPreview && <img src={avatarPreview} className="w-full h-full object-cover" />}
+            {avatarPreview && <img src={avatarPreview} className="w-full h-full object-cover" />}
           </div>
         </div>
       </header>
@@ -144,11 +146,10 @@ export default function SettingsDashboard({ onBack }: { onBack: () => void }) {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-shrink-0 md:w-full flex items-center justify-start gap-2.5 px-3 md:px-4 py-2.5 rounded-xl text-xs md:text-sm font-medium transition-all duration-200 ${
-                  activeTab === tab.id
-                    ? (darkMode ? "bg-indigo-500/10 text-indigo-400" : "bg-indigo-50 text-indigo-600")
-                    : (darkMode ? "text-slate-400 hover:text-slate-200 hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100")
-                }`}
+                className={`flex-shrink-0 md:w-full flex items-center justify-start gap-2.5 px-3 md:px-4 py-2.5 rounded-xl text-xs md:text-sm font-medium transition-all duration-200 ${activeTab === tab.id
+                  ? (darkMode ? "bg-indigo-500/10 text-indigo-400" : "bg-indigo-50 text-indigo-600")
+                  : (darkMode ? "text-slate-400 hover:text-slate-200 hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100")
+                  }`}
               >
                 {tab.icon}
                 {tab.label}
@@ -170,7 +171,7 @@ export default function SettingsDashboard({ onBack }: { onBack: () => void }) {
                 className="space-y-8"
               >
                 {activeTab === "profile" && <ProfileSettings darkMode={darkMode} profile={profile} setProfile={setProfile} avatarPreview={avatarPreview} setAvatarPreview={setAvatarPreview} fileInputRef={fileInputRef} addToast={addToast} />}
-                {activeTab === "security" && <SecuritySettings darkMode={darkMode} addToast={addToast} />}
+                {activeTab === "security" && <SecuritySettings darkMode={darkMode} addToast={addToast} showModal={showModal} />}
                 {activeTab === "integrations" && <IntegrationsSettings darkMode={darkMode} showModal={showModal} addToast={addToast} />}
                 {activeTab === "apikeys" && <APIKeysSettings darkMode={darkMode} showModal={showModal} addToast={addToast} />}
                 {activeTab === "notifications" && <NotificationSettings darkMode={darkMode} prefs={prefs} setPrefs={setPrefs} />}
@@ -181,7 +182,7 @@ export default function SettingsDashboard({ onBack }: { onBack: () => void }) {
 
             {["profile", "appearance", "system", "notifications"].includes(activeTab) && (
               <div className={`mt-10 pt-6 border-t flex flex-col-reverse sm:flex-row justify-end gap-3 ${darkMode ? "border-white/10" : "border-slate-200"}`}>
-                <button 
+                <button
                   onClick={() => {
                     setProfile(originalProfile);
                     setPrefs(originalPrefs);
@@ -244,7 +245,7 @@ const ToggleSwitch = ({ label, description, checked, onChange, darkMode }: any) 
 
 /* --- Profile Settings --- */
 const ProfileSettings = ({ darkMode, profile, setProfile, avatarPreview, setAvatarPreview, fileInputRef, addToast }: any) => (
-  
+
   <div className="space-y-6 md:space-y-8">
     <div className={`p-4 rounded-xl border flex items-center justify-between ${darkMode ? "bg-cyan-950/20 border-cyan-500/30" : "bg-cyan-50 border-cyan-200"}`}>
       <div>
@@ -260,7 +261,7 @@ const ProfileSettings = ({ darkMode, profile, setProfile, avatarPreview, setAvat
     </div>
     <div className="flex flex-col sm:flex-row gap-6 md:gap-8 items-start">
       <div className="flex flex-col items-center gap-3">
-        <div className={`w-20 h-20 md:w-24 md:h-24 rounded-full border-2 flex items-center justify-center relative group overflow-hidden ${darkMode ? "border-white/10 bg-white/5" : "border-slate-200 bg-slate-50"}`}>
+        <div className={`w-20 h-20 md:w-24 md:h-24 rounded-full border-2 flex items-center justify-center relative group overflow-hidden ${darkMode ? "border-white/10 bg-white/5" : "border-slate-200 transparent"}`}>
           {avatarPreview ? <img src={avatarPreview} className="w-full h-full object-cover" alt="Avatar" /> : <User className={`w-8 h-8 md:w-10 md:h-10 ${darkMode ? "text-slate-900 font-medium" : "text-slate-300"}`} />}
           <div onClick={() => fileInputRef.current?.click()} className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
             <Camera className="w-5 h-5 md:w-6 md:h-6 text-white" />
@@ -279,7 +280,7 @@ const ProfileSettings = ({ darkMode, profile, setProfile, avatarPreview, setAvat
             r.readAsDataURL(file);
           }
         }} />
-        <button onClick={() => fileInputRef.current?.click()} className={`text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors ${darkMode ? "border-white/10 text-slate-300 hover:bg-white/5" : "border-slate-200 text-slate-600 hover:bg-slate-50"}`}>
+        <button onClick={() => fileInputRef.current?.click()} className={`text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors ${darkMode ? "border-white/10 text-slate-300 hover:bg-white/5" : "border-slate-200 text-slate-600 hover:transparent"}`}>
           Upload Photo
         </button>
       </div>
@@ -298,8 +299,125 @@ const ProfileSettings = ({ darkMode, profile, setProfile, avatarPreview, setAvat
   </div>
 );
 
+
+const BiometricScannerUI = ({ isOpen, scanState, onClose, darkMode }: any) => {
+  if (!isOpen) return null;
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <motion.div
+            className={`relative w-full max-w-sm rounded-[24px] border p-8 overflow-hidden flex flex-col items-center shadow-2xl ${darkMode ? "bg-[#1A1A1A] border-white/10" : "bg-white border-slate-200"}`}
+            initial={{ scale: 0.9, y: 20 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.9, y: -20 }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-purple-500/10 opacity-50" />
+            
+            <h3 className={`relative z-10 text-xl font-semibold mb-2 ${darkMode ? "text-white" : "text-slate-900"}`}>
+              {scanState === "scanning" ? "Authenticating..." : "Authentication Complete"}
+            </h3>
+            <p className={`relative z-10 text-sm mb-8 text-center ${darkMode ? "text-slate-400" : "text-slate-500"}`}>
+              {scanState === "scanning" ? "Please touch the fingerprint sensor" : "Biometrics added from device successfully."}
+            </p>
+
+            <div className="relative z-10 flex items-center justify-center w-32 h-32 mb-4">
+              {/* Outer rings */}
+              <motion.div 
+                className={`absolute inset-0 rounded-full border-2 ${scanState === "success" ? "border-emerald-500/50" : "border-indigo-500/30"}`}
+                animate={scanState === "scanning" ? { scale: [1, 1.2, 1], opacity: [0.3, 0.1, 0.3] } : { scale: 1, opacity: 1 }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+              <motion.div 
+                className={`absolute inset-2 rounded-full border border-dashed ${scanState === "success" ? "border-emerald-400/50" : "border-indigo-400/50"}`}
+                animate={scanState === "scanning" ? { rotate: 360 } : { rotate: 0 }}
+                transition={{ duration: 8, ease: "linear", repeat: Infinity }}
+              />
+              
+              <div className={`relative flex items-center justify-center w-20 h-20 rounded-full shadow-inner ${darkMode ? "bg-black/50" : "bg-slate-100"}`}>
+                <Fingerprint 
+                  className={`w-10 h-10 ${scanState === "success" ? "text-emerald-500" : "text-indigo-500"}`} 
+                />
+                
+                {/* Scanning sweep line */}
+                {scanState === "scanning" && (
+                  <motion.div 
+                    className="absolute left-0 right-0 h-0.5 bg-indigo-400 shadow-[0_0_8px_2px_rgba(99,102,241,0.5)]"
+                    animate={{ top: ["10%", "90%", "10%"] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                )}
+              </div>
+            </div>
+
+            {scanState === "success" && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="relative z-10 mt-2 flex items-center justify-center w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-500"
+              >
+                <Check className="w-5 h-5" />
+              </motion.div>
+            )}
+
+            <button 
+              onClick={onClose}
+              className={`relative z-10 mt-6 px-6 py-2 text-sm font-medium rounded-full transition-colors ${darkMode ? "bg-white/10 hover:bg-white/20 text-white" : "bg-slate-100 hover:bg-slate-200 text-slate-900"}`}
+            >
+              Cancel
+            </button>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
 /* --- Security Settings --- */
-const SecuritySettings = ({ darkMode, addToast }: any) => {
+const SecuritySettings = ({ darkMode, addToast, showModal }: any) => {
+  const [showBioModal, setShowBioModal] = useState(false);
+  const [bioState, setBioState] = useState("idle");
+
+  const startBioScan = () => {
+    setShowBioModal(true);
+    setBioState("scanning");
+    setTimeout(() => {
+      setBioState("success");
+      setTimeout(() => {
+        setShowBioModal(false);
+        setBioState("idle");
+        addToast("Biometrics added from device successfully.", "success");
+      }, 2000);
+    }, 3000);
+  };
+  const handleMfaSetup = (type: string) => {
+    if (type === "app") {
+      showModal({
+        title: "Setup Authenticator App",
+        description: "Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.).",
+        riskLevel: "medium",
+        impact: "A generated QR code will be presented here in production.",
+        confirmText: "Verify Code",
+        onConfirm: () => addToast("Authenticator App configured successfully.", "success")
+      });
+    } else if (type === "email") {
+      showModal({
+        title: "Enable Email OTP",
+        description: "We will send a one-time passcode to your email address during login.",
+        riskLevel: "low",
+        impact: "Ensure your email address is secure and accessible.",
+        confirmText: "Send Verification Email",
+        onConfirm: () => addToast("Verification email sent.", "success")
+      });
+    } else if (type === "biometric") {
+      startBioScan();
+    }
+  };
   const [currentPass, setCurrentPass] = useState("");
   const [newPass, setNewPass] = useState("");
   const [isSav, setIsSav] = useState(false);
@@ -325,7 +443,7 @@ const SecuritySettings = ({ darkMode, addToast }: any) => {
         <h2 className="text-xl font-semibold mb-1">Security</h2>
         <p className={`text-sm ${darkMode ? "text-slate-400" : "text-slate-500"}`}>Manage your account access and credentials.</p>
       </div>
-      <div className={`p-4 md:p-6 rounded-2xl border ${darkMode ? "border-white/10 bg-white/5" : "border-slate-200 bg-slate-50"}`}>
+      <div className={`p-4 md:p-6 rounded-2xl border ${darkMode ? "border-white/10 bg-white/5" : "border-slate-200 transparent"}`}>
         <h3 className={`text-sm font-semibold mb-4 flex items-center gap-2 ${darkMode ? "text-slate-200" : "text-black"}`}>
           <Lock className="w-4 h-4" /> Change Password
         </h3>
@@ -338,43 +456,63 @@ const SecuritySettings = ({ darkMode, addToast }: any) => {
         </div>
       </div>
 
-      <div className={`p-4 md:p-6 rounded-2xl border ${darkMode ? "border-white/10 bg-white/5" : "border-slate-200 bg-slate-50"}`}>
+      <div className={`p-4 md:p-6 rounded-2xl border ${darkMode ? "border-white/10 bg-white/5" : "border-slate-200 transparent"}`}>
         <h3 className={`text-sm font-semibold mb-1 flex items-center gap-2 ${darkMode ? "text-slate-200" : "text-black"}`}>
           <Shield className="w-4 h-4" /> Multi-Factor Authentication (MFA)
         </h3>
         <p className={`text-xs mb-4 ${darkMode ? "text-slate-400" : "text-slate-500"}`}>Secure your account with an additional layer of defense.</p>
-        
+
         <div className="space-y-4">
-            <div className={`p-4 rounded-xl border flex items-center justify-between ${darkMode ? "border-white/10 bg-black/20" : "border-slate-200 bg-white"}`}>
-                <div className="flex items-center gap-3">
-                    <Smartphone className={`w-5 h-5 ${darkMode ? "text-indigo-400" : "text-indigo-600"}`} />
-                    <div>
-                        <p className={`text-sm font-medium ${darkMode ? "text-slate-200" : "text-black"}`}>Authenticator App</p>
-                        <p className={`text-xs ${darkMode ? "text-slate-400" : "text-slate-500"}`}>Use Google Authenticator or Authy</p>
-                    </div>
-                </div>
-                <button className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${darkMode ? "bg-white/5 border-white/10 hover:bg-white/10 text-white" : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-800"}`}>Setup</button>
+          <div className={`p-4 rounded-xl border flex items-center justify-between ${darkMode ? "border-white/10 bg-black/20" : "border-slate-200 bg-white"}`}>
+            <div className="flex items-center gap-3">
+              <Smartphone className={`w-5 h-5 ${darkMode ? "text-indigo-400" : "text-indigo-600"}`} />
+              <div>
+                <p className={`text-sm font-medium ${darkMode ? "text-slate-200" : "text-black"}`}>Authenticator App</p>
+                <p className={`text-xs ${darkMode ? "text-slate-400" : "text-slate-500"}`}>Use Google Authenticator or Authy</p>
+              </div>
             </div>
-            <div className={`p-4 rounded-xl border flex items-center justify-between ${darkMode ? "border-white/10 bg-black/20" : "border-slate-200 bg-white"}`}>
-                <div className="flex items-center gap-3">
-                    <Mail className={`w-5 h-5 ${darkMode ? "text-indigo-400" : "text-indigo-600"}`} />
-                    <div>
-                        <p className={`text-sm font-medium ${darkMode ? "text-slate-200" : "text-black"}`}>Email OTP</p>
-                        <p className={`text-xs ${darkMode ? "text-slate-400" : "text-slate-500"}`}>Receive one-time passcodes via email</p>
-                    </div>
-                </div>
-                <button className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${darkMode ? "bg-white/5 border-white/10 hover:bg-white/10 text-white" : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-800"}`}>Enable</button>
+            <button onClick={() => handleMfaSetup("app")} className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${darkMode ? "bg-white/5 border-white/10 hover:bg-white/10 text-white" : "transparent border-slate-200 hover:bg-slate-100 text-slate-800"}`}>Setup</button>
+          </div>
+          <div className={`p-4 rounded-xl border flex items-center justify-between ${darkMode ? "border-white/10 bg-black/20" : "border-slate-200 bg-white"}`}>
+            <div className="flex items-center gap-3">
+              <Mail className={`w-5 h-5 ${darkMode ? "text-indigo-400" : "text-indigo-600"}`} />
+              <div>
+                <p className={`text-sm font-medium ${darkMode ? "text-slate-200" : "text-black"}`}>Email OTP</p>
+                <p className={`text-xs ${darkMode ? "text-slate-400" : "text-slate-500"}`}>Receive one-time passcodes via email</p>
+              </div>
             </div>
+            <button onClick={() => handleMfaSetup("email")} className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${darkMode ? "bg-white/5 border-white/10 hover:bg-white/10 text-white" : "transparent border-slate-200 hover:bg-slate-100 text-slate-800"}`}>Enable</button>
+          </div>
+          <div className={`p-4 rounded-xl border flex items-center justify-between ${darkMode ? "border-white/10 bg-black/20" : "border-slate-200 bg-white"}`}>
+            <div className="flex items-center gap-3">
+              <Fingerprint className={`w-5 h-5 ${darkMode ? "text-indigo-400" : "text-indigo-600"}`} />
+              <div>
+                <p className={`text-sm font-medium ${darkMode ? "text-slate-200" : "text-black"}`}>Biometrics / WebAuthn</p>
+                <p className={`text-xs ${darkMode ? "text-slate-400" : "text-slate-500"}`}>Use TouchID or FaceID</p>
+              </div>
+            </div>
+            <button onClick={() => handleMfaSetup("biometric")} className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${darkMode ? "bg-white/5 border-white/10 hover:bg-white/10 text-white" : "transparent border-slate-200 hover:bg-slate-100 text-slate-800"}`}>Add</button>
+          </div>
         </div>
       </div>
-      
+
       <div className={`p-4 md:p-6 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${darkMode ? "border-red-500/20 bg-red-500/5" : "border-red-200 bg-red-50"}`}>
         <div>
-            <h3 className={`text-sm font-semibold mb-1 text-red-500`}>Active Sessions</h3>
-            <p className={`text-xs ${darkMode ? "text-red-400/80" : "text-red-600/80"}`}>Log out of all devices to revoke active tokens immediately.</p>
+          <h3 className={`text-sm font-semibold mb-1 text-red-500`}>Active Sessions</h3>
+          <p className={`text-xs ${darkMode ? "text-red-400/80" : "text-red-600/80"}`}>Log out of all devices to revoke active tokens immediately.</p>
         </div>
         <button className="px-4 py-2 text-xs font-medium rounded-lg border border-red-500/50 text-red-500 hover:bg-red-500 hover:text-white transition-all whitespace-nowrap">Revoke All Sessions</button>
       </div>
+      
+      <BiometricScannerUI 
+        isOpen={showBioModal} 
+        scanState={bioState} 
+        onClose={() => {
+          setShowBioModal(false);
+          setBioState("idle");
+        }} 
+        darkMode={darkMode} 
+      />
     </div>
   );
 };
@@ -394,7 +532,7 @@ const IntegrationsSettings = ({ darkMode, showModal, addToast }: any) => {
       if (res) setIntegrations(res);
     } finally { setIsLoading(false); }
   };
-  
+
   useEffect(() => { fetchInts(); }, []);
 
   const confirmRemove = (provider: string) => {
@@ -406,18 +544,18 @@ const IntegrationsSettings = ({ darkMode, showModal, addToast }: any) => {
       confirmText: "Yes, Disconnect",
       onConfirm: async () => {
         try {
-           await rmdIntegration(provider);
-           addToast(`Disconnected ${provider}`, "info");
-           fetchInts();
+          await rmdIntegration(provider);
+          addToast(`Disconnected ${provider}`, "info");
+          fetchInts();
         } catch {
-           addToast(`Error disconnecting ${provider}`, "error");
+          addToast(`Error disconnecting ${provider}`, "error");
         }
       }
     });
   };
 
   const isConnected = (p: string) => integrations.some(i => i.provider === p.toLowerCase());
-  
+
   const ProviderCard = ({ name, provider, desc, icon }: any) => (
     <div className={`p-4 md:p-5 rounded-2xl border flex flex-col justify-between transition-colors ${darkMode ? "border-white/10 bg-white/5 hover:bg-white/[0.07]" : "border-slate-200 bg-white hover:border-indigo-200"}`}>
       <div className="flex items-start justify-between mb-4">
@@ -438,15 +576,15 @@ const IntegrationsSettings = ({ darkMode, showModal, addToast }: any) => {
               <Check className="w-4 h-4" /> Connected
             </span>
             <div className="flex gap-2">
-              <button 
-                onClick={() => confirmRemove(provider)} 
+              <button
+                onClick={() => confirmRemove(provider)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${darkMode ? "text-red-400 hover:bg-red-400/10" : "text-red-600 hover:bg-red-50"}`}
                 title="Disconnect"
               >
                 Disconnect
               </button>
-              <button 
-                disabled 
+              <button
+                disabled
                 className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-not-allowed ${darkMode ? "bg-white/5 text-white/40" : "bg-slate-100 text-slate-400"}`}
               >
                 Connect
@@ -456,8 +594,8 @@ const IntegrationsSettings = ({ darkMode, showModal, addToast }: any) => {
         ) : (
           <>
             <span className={`text-xs font-medium ${darkMode ? "text-slate-500" : "text-slate-400"}`}>Not connected</span>
-            <button 
-              onClick={() => { setActiveProvider(provider); setModalOpen(true); }} 
+            <button
+              onClick={() => { setActiveProvider(provider); setModalOpen(true); }}
               className="px-5 py-1.5 rounded-lg text-xs font-medium bg-indigo-600 text-white hover:bg-indigo-500 shadow-sm transition-colors"
             >
               Connect
@@ -471,37 +609,37 @@ const IntegrationsSettings = ({ darkMode, showModal, addToast }: any) => {
   const icons = {
     github: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className={darkMode ? "text-white" : "text-slate-900"}>
-        <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.699-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.379.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.416 22 12c0-5.523-4.477-10-10-10z"/>
+        <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.699-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.379.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.416 22 12c0-5.523-4.477-10-10-10z" />
       </svg>
     ),
     gitlab: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <path d="M22.65 14.39L12 22.13 1.35 14.39a.84.84 0 0 1-.3-.94l1.22-3.78 2.44-7.51A.84.84 0 0 1 6.32 1.9c.47.05.85.42.92.89L9.69 10.3h4.63l2.45-7.51a.84.84 0 0 1 .91-.89c.48-.05.86.32.93.79l2.43 7.51 1.22 3.78c.15.5.02 1.04-.32 1.4z" fill="#E24329"/>
+        <path d="M22.65 14.39L12 22.13 1.35 14.39a.84.84 0 0 1-.3-.94l1.22-3.78 2.44-7.51A.84.84 0 0 1 6.32 1.9c.47.05.85.42.92.89L9.69 10.3h4.63l2.45-7.51a.84.84 0 0 1 .91-.89c.48-.05.86.32.93.79l2.43 7.51 1.22 3.78c.15.5.02 1.04-.32 1.4z" fill="#E24329" />
       </svg>
     ),
     slack: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="text-[#E01E5A]">
-        <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.52H15.165z"/>
+        <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.52H15.165z" />
       </svg>
     ),
     gemini: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" fill="url(#gemini-grad)"/>
+        <path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" fill="url(#gemini-grad)" />
         <defs>
           <linearGradient id="gemini-grad" x1="2" y1="2" x2="22" y2="22">
-            <stop stopColor="#4185f4"/><stop offset="1" stopColor="#ea4335"/>
+            <stop stopColor="#4185f4" /><stop offset="1" stopColor="#ea4335" />
           </linearGradient>
         </defs>
       </svg>
     ),
     aws: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="#FF9900">
-        <path d="M12.923 18.258c-1.341.344-2.813.529-4.22.529-1.921 0-3.69-.328-5.26-.94-.356-.129-.533-.081-.66.082-.016.035-1.52 2.115-1.545 2.155-.164.218-.112.433.09.529C3.197 21.6 6.35 22.5 9.774 22.5c2.474 0 5.23-.427 7.749-1.258.118-.035.155-.078.204-.216l.896-2.502c.045-.213.06-.328-.158-.458-.871-.52-1.905-.724-2.903-.724a6.621 6.621 0 0 0-2.639.529l-.001-.005.001-.008zm10.748-1.53c-.114-.15-.296-.289-.597-.33-4.32-.473-8.868-2.316-12.72-5.187C6.015 7.973 2.85 4.195.938 1.439c-.198-.288-.415-.365-.678-.36l-1.42.062c-.328.016-.48.202-.303.454a39.183 39.183 0 0 0 5.176 5.86 37.957 37.957 0 0 0 9.176 6.275c3.21 1.488 6.45 2.457 9.873 3.037.382.046.592.016.711-.19.041-.059.882-1.42.923-1.478.136-.202.041-.33-.046-.431h-.001.001v.001zm-5.467-2.66h.001V14.07h-.001c-.139 0-.251-.08-.284-.217z"/>
+        <path d="M12.923 18.258c-1.341.344-2.813.529-4.22.529-1.921 0-3.69-.328-5.26-.94-.356-.129-.533-.081-.66.082-.016.035-1.52 2.115-1.545 2.155-.164.218-.112.433.09.529C3.197 21.6 6.35 22.5 9.774 22.5c2.474 0 5.23-.427 7.749-1.258.118-.035.155-.078.204-.216l.896-2.502c.045-.213.06-.328-.158-.458-.871-.52-1.905-.724-2.903-.724a6.621 6.621 0 0 0-2.639.529l-.001-.005.001-.008zm10.748-1.53c-.114-.15-.296-.289-.597-.33-4.32-.473-8.868-2.316-12.72-5.187C6.015 7.973 2.85 4.195.938 1.439c-.198-.288-.415-.365-.678-.36l-1.42.062c-.328.016-.48.202-.303.454a39.183 39.183 0 0 0 5.176 5.86 37.957 37.957 0 0 0 9.176 6.275c3.21 1.488 6.45 2.457 9.873 3.037.382.046.592.016.711-.19.041-.059.882-1.42.923-1.478.136-.202.041-.33-.046-.431h-.001.001v.001zm-5.467-2.66h.001V14.07h-.001c-.139 0-.251-.08-.284-.217z" />
       </svg>
     ),
     sentry: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className={darkMode ? "text-[#E01E5A]" : "text-[#362D59]"}>
-        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.12 17.532c-.173.344-.569.497-.93.363l-1.92-.663c-.156-.051-.318-.08-.475-.08-.755 0-1.4.385-1.787.973-.086.13-.23.216-.39.216s-.304-.085-.39-.216c-.387-.588-1.032-.973-1.787-.973-.157 0-.319.029-.475.08l-1.92.663c-.361.134-.757-.019-.93-.363-.16-.32-.016-.713.313-.889l1.83-1.077c.306-.188.5-.515.5-.863v-3.32h4.595v3.32c0 .348.194.675.5.863l1.83 1.077c.329.176.474.568.314.889zM12 6.002c-1.39 0-2.52 1.127-2.52 2.51v3.29h5.04V8.512c0-1.383-1.13-2.51-2.52-2.51z"/>
+        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.12 17.532c-.173.344-.569.497-.93.363l-1.92-.663c-.156-.051-.318-.08-.475-.08-.755 0-1.4.385-1.787.973-.086.13-.23.216-.39.216s-.304-.085-.39-.216c-.387-.588-1.032-.973-1.787-.973-.157 0-.319.029-.475.08l-1.92.663c-.361.134-.757-.019-.93-.363-.16-.32-.016-.713.313-.889l1.83-1.077c.306-.188.5-.515.5-.863v-3.32h4.595v3.32c0 .348.194.675.5.863l1.83 1.077c.329.176.474.568.314.889zM12 6.002c-1.39 0-2.52 1.127-2.52 2.51v3.29h5.04V8.512c0-1.383-1.13-2.51-2.52-2.51z" />
       </svg>
     )
   };
@@ -526,12 +664,12 @@ const IntegrationsSettings = ({ darkMode, showModal, addToast }: any) => {
       )}
       <AnimatePresence>
         {modalOpen && activeProvider && (
-           <IntegrationModal 
-              provider={activeProvider} 
-              darkMode={darkMode} 
-              onClose={() => { setModalOpen(false); setActiveProvider(null); }} 
-              onSuccess={() => { setModalOpen(false); setActiveProvider(null); fetchInts(); addToast(`Successfully connected to ${activeProvider}`, "success"); }}
-           />
+          <IntegrationModal
+            provider={activeProvider}
+            darkMode={darkMode}
+            onClose={() => { setModalOpen(false); setActiveProvider(null); }}
+            onSuccess={() => { setModalOpen(false); setActiveProvider(null); fetchInts(); addToast(`Successfully connected to ${activeProvider}`, "success"); }}
+          />
         )}
       </AnimatePresence>
     </div>
@@ -539,7 +677,7 @@ const IntegrationsSettings = ({ darkMode, showModal, addToast }: any) => {
 };
 
 const IntegrationModal = ({ provider, darkMode, onClose, onSuccess }: any) => {
-  const [step, setStep] = useState(0); 
+  const [step, setStep] = useState(0);
   const [apiKey, setApiKey] = useState("");
   const [awsKeyId, setAwsKeyId] = useState("");
   const [awsSecret, setAwsSecret] = useState("");
@@ -552,78 +690,78 @@ const IntegrationModal = ({ provider, darkMode, onClose, onSuccess }: any) => {
     setError("");
     setStep(1);
     try {
-       let token = "";
-       if (isOAuth) {
-          await new Promise(r => setTimeout(r, 1500));
-          token = `oauth-token-${Date.now()}`;
-       } else if (isAWS) {
-          if (!awsKeyId || !awsSecret) throw new Error("AWS credentials required");
-          await new Promise(r => setTimeout(r, 1000));
-          token = `aws-${awsKeyId}`;
-       } else {
-          if (!apiKey) throw new Error("API Key mapping required");
-          await new Promise(r => setTimeout(r, 1000));
-          token = apiKey;
-       }
-       await addIntegration(provider, token);
-       setStep(2);
-       setTimeout(() => onSuccess(), 1000);
+      let token = "";
+      if (isOAuth) {
+        await new Promise(r => setTimeout(r, 1500));
+        token = `oauth-token-${Date.now()}`;
+      } else if (isAWS) {
+        if (!awsKeyId || !awsSecret) throw new Error("AWS credentials required");
+        await new Promise(r => setTimeout(r, 1000));
+        token = `aws-${awsKeyId}`;
+      } else {
+        if (!apiKey) throw new Error("API Key mapping required");
+        await new Promise(r => setTimeout(r, 1000));
+        token = apiKey;
+      }
+      await addIntegration(provider, token);
+      setStep(2);
+      setTimeout(() => onSuccess(), 1000);
     } catch (e: any) {
-       setError(e.message || "Connection failed. Please check credentials.");
-       setStep(0);
+      setError(e.message || "Connection failed. Please check credentials.");
+      setStep(0);
     }
   };
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <motion.div initial={{ y: 20, scale: 0.95 }} animate={{ y: 0, scale: 1 }} exit={{ y: 20, scale: 0.95 }} className={`w-full max-w-md rounded-2xl border shadow-xl overflow-hidden ${darkMode ? "bg-[#111] border-white/10" : "bg-white border-slate-200"}`}>
-        <div className={`p-4 border-b flex justify-between items-center ${darkMode ? "border-white/10 bg-white/5" : "border-slate-100 bg-slate-50"}`}>
-           <h3 className={`font-semibold ${darkMode ? "text-white" : "text-black"}`}>Connect {provider.toUpperCase()}</h3>
-           <button onClick={onClose} className={`p-1 rounded-md ${darkMode ? "hover:bg-white/10 text-slate-400" : "hover:bg-slate-200 text-slate-500"}`}>✕</button>
+        <div className={`p-4 border-b flex justify-between items-center ${darkMode ? "border-white/10 bg-white/5" : "border-slate-100 transparent"}`}>
+          <h3 className={`font-semibold ${darkMode ? "text-white" : "text-black"}`}>Connect {provider.toUpperCase()}</h3>
+          <button onClick={onClose} className={`p-1 rounded-md ${darkMode ? "hover:bg-white/10 text-slate-400" : "hover:bg-slate-200 text-slate-500"}`}>✕</button>
         </div>
-        
+
         <div className="p-6">
-           {step === 0 && (
-             <div className="space-y-4">
-                <p className={`text-sm ${darkMode ? "text-slate-300" : "text-slate-600"}`}>Authenticate with {provider} to enable automated workflows and real-time telemetry syncing.</p>
-                
-                {error && <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-medium">{error}</div>}
+          {step === 0 && (
+            <div className="space-y-4">
+              <p className={`text-sm ${darkMode ? "text-slate-300" : "text-slate-600"}`}>Authenticate with {provider} to enable automated workflows and real-time telemetry syncing.</p>
 
-                {isOAuth ? (
-                   <div className={`p-4 rounded-xl border text-center text-sm font-medium ${darkMode ? "bg-white/5 border-white/10 text-slate-300" : "bg-slate-50 border-slate-200 text-slate-700"}`}>
-                      Requires OAuth redirect authorization
-                   </div>
-                ) : isAWS ? (
-                   <div className="space-y-3">
-                      <input type="text" placeholder="AWS Access Key ID" value={awsKeyId} onChange={e => setAwsKeyId(e.target.value)} className={`w-full px-3 py-2 text-sm rounded-lg border outline-none ${darkMode ? "bg-black/50 border-white/10 text-white" : "bg-white border-slate-300"}`} />
-                      <input type="password" placeholder="AWS Secret Access Key" value={awsSecret} onChange={e => setAwsSecret(e.target.value)} className={`w-full px-3 py-2 text-sm rounded-lg border outline-none ${darkMode ? "bg-black/50 border-white/10 text-white" : "bg-white border-slate-300"}`} />
-                   </div>
-                ) : (
-                   <input type="password" placeholder="API Key Token" value={apiKey} onChange={e => setApiKey(e.target.value)} className={`w-full px-3 py-2 text-sm rounded-lg border outline-none ${darkMode ? "bg-black/50 border-white/10 text-white" : "bg-white border-slate-300"}`} />
-                )}
+              {error && <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-medium">{error}</div>}
 
-                <div className="pt-4 flex justify-end gap-3">
-                   <button onClick={onClose} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${darkMode ? "hover:bg-white/10 text-slate-300" : "hover:bg-slate-100 text-slate-600"}`}>Cancel</button>
-                   <button onClick={handleConnect} className="px-4 py-2 rounded-lg text-sm font-medium bg-indigo-600 hover:bg-indigo-500 text-white transition-colors">Authorize Access</button>
+              {isOAuth ? (
+                <div className={`p-4 rounded-xl border text-center text-sm font-medium ${darkMode ? "bg-white/5 border-white/10 text-slate-300" : "transparent border-slate-200 text-slate-700"}`}>
+                  Requires OAuth redirect authorization
                 </div>
-             </div>
-           )}
+              ) : isAWS ? (
+                <div className="space-y-3">
+                  <input type="text" placeholder="AWS Access Key ID" value={awsKeyId} onChange={e => setAwsKeyId(e.target.value)} className={`w-full px-3 py-2 text-sm rounded-lg border outline-none ${darkMode ? "bg-black/50 border-white/10 text-white" : "bg-white border-slate-300"}`} />
+                  <input type="password" placeholder="AWS Secret Access Key" value={awsSecret} onChange={e => setAwsSecret(e.target.value)} className={`w-full px-3 py-2 text-sm rounded-lg border outline-none ${darkMode ? "bg-black/50 border-white/10 text-white" : "bg-white border-slate-300"}`} />
+                </div>
+              ) : (
+                <input type="password" placeholder="API Key Token" value={apiKey} onChange={e => setApiKey(e.target.value)} className={`w-full px-3 py-2 text-sm rounded-lg border outline-none ${darkMode ? "bg-black/50 border-white/10 text-white" : "bg-white border-slate-300"}`} />
+              )}
 
-           {step === 1 && (
-             <div className="py-8 flex flex-col items-center justify-center gap-4">
-               <div className="w-10 h-10 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
-               <p className={`text-sm font-medium animate-pulse ${darkMode ? "text-slate-300" : "text-slate-600"}`}>Establishing secure handshake...</p>
-             </div>
-           )}
+              <div className="pt-4 flex justify-end gap-3">
+                <button onClick={onClose} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${darkMode ? "hover:bg-white/10 text-slate-300" : "hover:bg-slate-100 text-slate-600"}`}>Cancel</button>
+                <button onClick={handleConnect} className="px-4 py-2 rounded-lg text-sm font-medium bg-indigo-600 hover:bg-indigo-500 text-white transition-colors">Authorize Access</button>
+              </div>
+            </div>
+          )}
 
-           {step === 2 && (
-             <div className="py-8 flex flex-col items-center justify-center gap-4">
-               <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center">
-                  <Check className="w-6 h-6" />
-               </div>
-               <p className={`text-sm font-medium ${darkMode ? "text-slate-200" : "text-slate-800"}`}>Connection Successful</p>
-             </div>
-           )}
+          {step === 1 && (
+            <div className="py-8 flex flex-col items-center justify-center gap-4">
+              <div className="w-10 h-10 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+              <p className={`text-sm font-medium animate-pulse ${darkMode ? "text-slate-300" : "text-slate-600"}`}>Establishing secure handshake...</p>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="py-8 flex flex-col items-center justify-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center">
+                <Check className="w-6 h-6" />
+              </div>
+              <p className={`text-sm font-medium ${darkMode ? "text-slate-200" : "text-slate-800"}`}>Connection Successful</p>
+            </div>
+          )}
         </div>
       </motion.div>
     </motion.div>
@@ -636,19 +774,22 @@ const APIKeysSettings = ({ darkMode, showModal, addToast }: any) => {
   const [isCreating, setIsCreating] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadKeys = async () => { 
+  const loadKeys = async () => {
     try {
-      const data = await fetchApiKeys(); 
-      if (data) setKeys(data); 
+      const data = await fetchApiKeys();
+      if (data) setKeys(data);
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   useEffect(() => { loadKeys(); }, []);
 
   const handleCreate = async () => {
-    if (!newKeyName.trim()) return;
+    if (!newKeyName.trim()) {
+      addToast("Please enter a name for the API key.", "warning");
+      return;
+    }
     setIsCreating(true);
     try {
       const res = await createApiKey(newKeyName);
@@ -659,7 +800,7 @@ const APIKeysSettings = ({ darkMode, showModal, addToast }: any) => {
         riskLevel: "low",
         impact: res.token_full,
         confirmText: "Acknowledge",
-        onConfirm: () => {}
+        onConfirm: () => { }
       });
       setNewKeyName("");
       loadKeys();
@@ -702,25 +843,25 @@ const APIKeysSettings = ({ darkMode, showModal, addToast }: any) => {
           <p className={`text-sm ${darkMode ? "text-slate-400" : "text-slate-500"}`}>Generate programmatic tokens to execute external REST triggers.</p>
         </div>
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          <input 
-            value={newKeyName} 
-            onChange={e => setNewKeyName(e.target.value)} 
-            placeholder="e.g. CI/CD Runner" 
-            className={`w-full sm:w-48 px-3 py-2 text-sm rounded-xl border outline-none focus:border-indigo-500 transition-colors ${darkMode ? "bg-black/50 border-white/10 text-white" : "bg-white border-slate-300"}`} 
+          <input
+            value={newKeyName}
+            onChange={e => setNewKeyName(e.target.value)}
+            placeholder="e.g. CI/CD Runner"
+            className={`w-full sm:w-48 px-3 py-2 text-sm rounded-xl border outline-none focus:border-indigo-500 transition-colors ${darkMode ? "bg-black/50 border-white/10 text-white" : "bg-white border-slate-300"}`}
           />
-          <button 
-            onClick={handleCreate} 
-            disabled={isCreating || !newKeyName.trim()}
-            className="flex-shrink-0 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
+          <button
+            onClick={handleCreate}
+            disabled={isCreating}
+            className={`flex-shrink-0 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-2 ${isCreating ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
           >
             {isCreating ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Plus className="w-4 h-4" />}
             <span className="hidden sm:inline">Create</span>
           </button>
         </div>
       </div>
-      
+
       <div className={`rounded-2xl border overflow-hidden ${darkMode ? "border-white/10 bg-white/[0.02]" : "border-slate-200 bg-white"}`}>
-        <div className={`p-4 border-b text-xs font-semibold uppercase tracking-wider flex ${darkMode ? "bg-white/5 border-white/10 text-slate-400" : "bg-slate-50 border-slate-200 text-slate-500"}`}>
+        <div className={`p-4 border-b text-xs font-semibold uppercase tracking-wider flex ${darkMode ? "bg-white/5 border-white/10 text-slate-400" : "transparent border-slate-200 text-slate-500"}`}>
           <div className="w-5/12 sm:w-1/3">Name</div>
           <div className="w-5/12 sm:w-1/3 text-center sm:text-left">Prefix</div>
           <div className="w-2/12 sm:w-1/3 text-right">Actions</div>
@@ -759,7 +900,7 @@ const APIKeysSettings = ({ darkMode, showModal, addToast }: any) => {
 /* --- Notifications Settings --- */
 const NotificationSettings = ({ darkMode, prefs, setPrefs }: any) => {
   const toggle = (key: string) => setPrefs({ ...prefs, notifications: { ...prefs.notifications, [key]: !prefs.notifications[key] } });
-  
+
   return (
     <div className="space-y-6 md:space-y-8 max-w-2xl">
       <div>
@@ -786,15 +927,15 @@ const AppearanceSettings = ({ darkMode, setDarkMode, prefs, setPrefs }: any) => 
       <h2 className="text-xl font-semibold mb-1">Appearance</h2>
       <p className={`text-sm ${darkMode ? "text-slate-400" : "text-slate-500"}`}>Customize how the platform command center looks on your physical monitors.</p>
     </div>
-    
+
     <div className="space-y-4">
       <h3 className={`text-sm font-semibold uppercase tracking-wider ${darkMode ? "text-slate-500" : "text-slate-400"}`}>Theme Toggle</h3>
       <div className="grid grid-cols-2 gap-4 max-w-sm">
-        <button onClick={() => { setDarkMode(false); setPrefs({...prefs, theme: 'light'}); }} className={`p-4 rounded-xl border-2 flex flex-col items-center gap-3 transition-all ${!darkMode ? "border-indigo-500 bg-indigo-500/5 text-indigo-600" : "border-slate-200 bg-white text-slate-500 hover:border-indigo-300"}`}>
+        <button onClick={() => { setDarkMode(false); setPrefs({ ...prefs, theme: 'light' }); }} className={`p-4 rounded-xl border-2 flex flex-col items-center gap-3 transition-all ${!darkMode ? "border-indigo-500 bg-indigo-500/5 text-indigo-600" : "border-slate-200 bg-white text-slate-500 hover:border-indigo-300"}`}>
           <Sun className={`w-6 h-6 md:w-8 md:h-8 ${!darkMode ? 'text-indigo-500' : ''}`} />
           <span className="font-medium text-xs md:text-sm">Light Interface</span>
         </button>
-        <button onClick={() => { setDarkMode(true); setPrefs({...prefs, theme: 'dark'}); }} className={`p-4 rounded-xl border-2 flex flex-col items-center gap-3 transition-all ${darkMode ? "border-indigo-500 bg-indigo-500/10 text-indigo-400" : "border-white/10 bg-white/5 text-slate-400 hover:border-indigo-500/50"}`}>
+        <button onClick={() => { setDarkMode(true); setPrefs({ ...prefs, theme: 'dark' }); }} className={`p-4 rounded-xl border-2 flex flex-col items-center gap-3 transition-all ${darkMode ? "border-indigo-500 bg-indigo-500/10 text-indigo-400" : "border-white/10 bg-white/5 text-slate-400 hover:border-indigo-500/50"}`}>
           <Moon className={`w-6 h-6 md:w-8 md:h-8 ${darkMode ? 'text-indigo-400' : ''}`} />
           <span className="font-medium text-xs md:text-sm">Dark Environment</span>
         </button>
@@ -826,7 +967,7 @@ const SystemSettings = ({ darkMode, prefs, setPrefs }: any) => (
       <h2 className="text-xl font-semibold mb-1">Core Architecture Parameters</h2>
       <p className={`text-sm ${darkMode ? "text-slate-400" : "text-slate-500"}`}>Control internal logical systems and AI behavioral deployments.</p>
     </div>
-    
+
     <div className="space-y-6 max-w-sm">
       <div className="space-y-2">
         <label className={`text-sm font-medium flex items-center gap-2 ${darkMode ? "text-slate-300" : "text-black font-semibold"}`}>Primary Reasoning AI Model</label>
@@ -837,7 +978,7 @@ const SystemSettings = ({ darkMode, prefs, setPrefs }: any) => (
         </select>
         <p className={`text-xs ${darkMode ? "text-slate-500" : "text-slate-500"}`}>Affects complex reasoning fallbacks when processing PR diffs.</p>
       </div>
-      
+
       <div className="space-y-2">
         <label className={`text-sm font-medium ${darkMode ? "text-slate-300" : "text-black font-semibold"}`}>Global Log Retention Period</label>
         <select value={prefs.log_retention || "30 Days"} onChange={(e) => setPrefs({ ...prefs, log_retention: e.target.value })} className={`w-full px-4 py-3 rounded-xl border text-sm transition-colors outline-none cursor-pointer ${darkMode ? "bg-black/50 border-white/10 text-white focus:border-indigo-500" : "bg-white border-slate-300 text-slate-900 focus:border-indigo-500"}`}>

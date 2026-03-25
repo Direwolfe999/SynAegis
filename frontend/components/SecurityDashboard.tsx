@@ -1,3 +1,4 @@
+import { useTheme } from "./ThemeProvider";
 import React, { useState, useEffect } from "react";
 
 import { API_BASE, WS_BASE } from "../lib/api";
@@ -80,7 +81,7 @@ function getColorClass(type: string, value: number, darkMode: boolean) {
 
 export default function SecurityDashboard({ onBack }: { onBack: () => void }) {
     const { addToast, showModal } = useToast();
-    const [darkMode, setDarkMode] = useState(true);
+    const { isDarkMode: darkMode, toggleTheme: setDarkMode } = useTheme();
     const [threats, setThreats] = useState(MOCK_THREATS);
     const [vulns, setVulns] = useState(MOCK_VULNS);
     const [logs, setLogs] = useState(MOCK_LOGS);
@@ -288,7 +289,7 @@ export default function SecurityDashboard({ onBack }: { onBack: () => void }) {
 
                 <div className="flex items-center gap-4">
                     <NotificationBell darkMode={darkMode} />
-                    <button onClick={() => setDarkMode(!darkMode)} className="p-2 rounded-full hover:bg-slate-500/10 transition-colors">
+                    <button onClick={() => setDarkMode()} className="p-2 rounded-full hover:bg-slate-500/10 transition-colors">
                         {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                     </button>
                     <div className="w-8 h-8 rounded-full bg-gradient-to-r from-red-500 to-pink-500 border-2 border-[#050505] cursor-pointer"></div>
@@ -488,7 +489,7 @@ export default function SecurityDashboard({ onBack }: { onBack: () => void }) {
                                                         <p className="text-xs text-slate-400 leading-relaxed">
                                                             High frequency of failed logins originating from the `10.0.x.x` subnet. Recommending immediate temporary block on IP `10.0.0.88`.
                                                         </p>
-                                                        <button className="mt-3 text-xs font-medium text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1">
+                                                        <button onClick={() => triggerAiAction('block')} className="mt-3 text-xs font-medium text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1">
                                                             Auto-Apply Block →
                                                         </button>
                                                     </div>
@@ -505,7 +506,7 @@ export default function SecurityDashboard({ onBack }: { onBack: () => void }) {
                                                         <p className="text-xs text-slate-400 leading-relaxed">
                                                             `urllib3` is affected by CVE-2023-4863 in your staging environment. Generate an auto-fix MR?
                                                         </p>
-                                                        <button className="mt-3 text-xs font-medium text-orange-400 hover:text-orange-300 transition-colors flex items-center gap-1">
+                                                        <button onClick={() => triggerAiAction('patch')} className="mt-3 text-xs font-medium text-orange-400 hover:text-orange-300 transition-colors flex items-center gap-1">
                                                             Create Auto-Fix MR →
                                                         </button>
                                                     </div>

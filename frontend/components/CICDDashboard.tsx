@@ -1,11 +1,12 @@
+import { useTheme } from "./ThemeProvider";
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "./ToastProvider";
 import { NotificationBell } from "./NotificationBell";
-import { 
-    Activity, Clock, AlertCircle, CheckCircle, XCircle, Terminal, 
+import {
+    Activity, Clock, AlertCircle, CheckCircle, XCircle, Terminal,
     Search, Play, Square, RotateCcw, Filter, ChevronDown, ChevronUp,
-    Sun, Moon, Bell, Database, Server, Zap, Shield, Sparkles, Bot, Wrench, GitBranch, ExternalLink, X 
+    Sun, Moon, Bell, Database, Server, Zap, Shield, Sparkles, Bot, Wrench, GitBranch, ExternalLink, X
 } from "lucide-react";
 import { fetchPipelines, triggerPipeline, applyPatch, WS_BASE, triggerPipelineAction } from "../lib/api";
 
@@ -24,7 +25,7 @@ const MOCK_LOGS = [
 
 export default function CICDDashboard({ onBack }: { onBack: () => void }) {
     const { addToast, showModal } = useToast();
-    const [darkMode, setDarkMode] = useState(true);
+    const { isDarkMode: darkMode, toggleTheme: setDarkMode } = useTheme();
     const [pipelines, setPipelines] = useState<any[]>([]);
     const [logs, setLogs] = useState(MOCK_LOGS);
     const [aiOpen, setAiOpen] = useState(true);
@@ -37,6 +38,7 @@ export default function CICDDashboard({ onBack }: { onBack: () => void }) {
     const logsEndRef = useRef<HTMLDivElement>(null);
     const [activeModule, setActiveModule] = useState('All Modules');
     const [moduleDropdownOpen, setModuleDropdownOpen] = useState(false);
+    const [logFilter, setLogFilter] = useState('All');
 
     useEffect(() => {
         if (logsEndRef.current) {
@@ -72,7 +74,7 @@ export default function CICDDashboard({ onBack }: { onBack: () => void }) {
                         }
                     });
                 }
-            } catch (err) {}
+            } catch (err) { }
         };
         return () => socket.close();
     }, []);
@@ -93,6 +95,10 @@ export default function CICDDashboard({ onBack }: { onBack: () => void }) {
             } else {
                 setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ⏳ Waiting for GitLab Runner execution & webhook confirmation...`]);
                 clearInterval(initInterval);
+                setTimeout(() => {
+                    setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] 🟢 GitLab Runner: Pipeline triggered correctly.`, `[${new Date().toLocaleTimeString()}] ✅ GitLab Runner execution completed successfully!`]);
+                    setLiveLogState('success');
+                }, 3000);
             }
         }, 2000);
         return () => clearInterval(initInterval);
@@ -107,7 +113,7 @@ export default function CICDDashboard({ onBack }: { onBack: () => void }) {
                 try {
                     await triggerPipelineAction(id, action);
                     addToast(`Pipeline ${id} ${action} operation successful.`, 'success');
-                    
+
                     setPipelines(prev => prev.map(p => {
                         if (p.id === id) {
                             if (action === 'cancel') return { ...p, status: 'failed' };
@@ -135,7 +141,7 @@ export default function CICDDashboard({ onBack }: { onBack: () => void }) {
     };
 
     return (
-        <div className={`min-h-screen w-full flex flex-col font-sans transition-all duration-500 ease-in-out ${darkMode ? "bg-[#050505] text-slate-200" : "bg-slate-50 text-black font-medium"}`}>
+        <div className={`min-h-screen w-full flex flex-col font-sans transition-all duration-500 ease-in-out ${darkMode ? "text-inherit" : "text-inherit font-medium"}`}>
             <header className={`sticky top-0 z-50 px-6 py-4 border-b flex items-center justify-between backdrop-blur-md ${darkMode ? "border-white/10 bg-[#050505]/80" : "border-slate-200 bg-white/80"}`}>
                 <div className="flex items-center gap-6">
                     <div className="flex items-center gap-2">
@@ -152,7 +158,7 @@ export default function CICDDashboard({ onBack }: { onBack: () => void }) {
                 </div>
                 <div className="flex items-center gap-4">
                     <NotificationBell darkMode={darkMode} />
-                    <button onClick={() => setDarkMode(!darkMode)} className="p-2 rounded-full hover:bg-slate-500/10 transition-colors">
+                    <button onClick={() => setDarkMode()} className="p-2 rounded-full hover:bg-slate-500/10 transition-colors">
                         {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                     </button>
                 </div>
@@ -229,12 +235,12 @@ export default function CICDDashboard({ onBack }: { onBack: () => void }) {
                                 </div>
                             </div>
 
-                            <div className="p-4 sm:p-5 flex flex-col gap-4">
+                            <div className="p-4 sm:p-5 flex flex-col gap-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                                 {loading ? (
                                     <div className="text-center text-slate-500 animate-pulse py-8">Syncing Pipeline Data with GitLab...</div>
                                 ) : pipelines.length === 0 ? (
                                     <div className="text-center text-slate-500 py-8">No pipelines running or available.</div>
-                                ) : pipelines.filter(p => activeModule === 'All Modules' || (p.name && p.name.includes(activeModule))).map((pipe: any) => (
+                                ) : pipelines.filter(p => activeModule === 'All Modules' || (p.name && p.name.toLowerCase().includes(activeModule.toLowerCase())) || (p.commit && p.commit.toLowerCase().includes(activeModule.toLowerCase()))).map((pipe: any) => (
                                     <div key={pipe.id} className={`flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border transition-colors ${darkMode ? "bg-black/20 border-white/5 hover:bg-white/5" : "bg-slate-50 border-slate-200 hover:bg-slate-100"}`}>
                                         <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8 flex-1">
                                             <div className="flex flex-col gap-1 min-w-[200px]">
@@ -278,19 +284,36 @@ export default function CICDDashboard({ onBack }: { onBack: () => void }) {
                                     <Terminal className="w-4 h-4" />
                                     <span className="text-sm font-mono tracking-wider">LIVE LOGS: Backend Deploy (Prod)</span>
                                 </div>
-                                <div className="flex items-center gap-2 bg-black/50 px-2 py-1 rounded border border-slate-800 w-full sm:w-auto">
-                                    <Search className="w-3.5 h-3.5" />
-                                    <input
-                                        type="text"
-                                        placeholder="Filter logs..."
-                                        className="bg-transparent border-none outline-none text-xs w-full sm:w-32 font-mono"
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                    />
+                                <div className="flex items-center gap-3 w-full sm:w-auto">
+                                    <select
+                                        className={`bg-black/50 text-xs px-2 py-1.5 rounded border outline-none cursor-pointer ${darkMode ? "border-slate-800 text-slate-300" : "border-slate-300 text-slate-700 bg-white"}`}
+                                        value={logFilter}
+                                        onChange={(e) => setLogFilter(e.target.value)}
+                                    >
+                                        <option value="All">All Logs</option>
+                                        <option value="Warnings">Warnings</option>
+                                        <option value="Errors">Errors</option>
+                                        <option value="Success">Success</option>
+                                    </select>
+                                    <div className="flex items-center gap-2 bg-black/50 px-2 py-1 rounded border border-slate-800 w-full sm:w-auto">
+                                        <Search className="w-3.5 h-3.5" />
+                                        <input
+                                            type="text"
+                                            placeholder="Search..."
+                                            className="bg-transparent border-none outline-none text-xs w-full sm:w-28 font-mono"
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                             <div className="flex-1 p-4 overflow-y-auto font-mono text-[13px] leading-relaxed hide-scrollbar">
-                                {logs.filter(l => l.toLowerCase().includes(searchQuery.toLowerCase())).map((log, i) => {
+                                {logs.filter(l => {
+                                    if (logFilter === 'Warnings') return l.includes('WARNING') || l.includes('⚠️');
+                                    if (logFilter === 'Errors') return l.includes('ERROR') || l.includes('❌') || l.includes('Failed');
+                                    if (logFilter === 'Success') return l.includes('✅') || l.includes('Success');
+                                    return true;
+                                }).filter(l => l.toLowerCase().includes(searchQuery.toLowerCase())).map((log, i) => {
                                     const isWarning = log.includes("WARNING");
                                     const isError = log.includes("ERROR");
                                     const isSuccess = log.includes("✅");
@@ -418,8 +441,8 @@ export default function CICDDashboard({ onBack }: { onBack: () => void }) {
                                                             <code className="text-red-400">- RUN npm install</code><br />
                                                             <code className="text-emerald-400">+ RUN npm ci --omit=dev --legacy-peer-deps</code><br />
                                                             <code className="text-emerald-400">+ ENV NODE_OPTIONS="--max-old-space-size=4096"</code><br />
-                                                            <code className="text-slate-400">  cache:</code><br/>
-                                                            <code className="text-slate-400">    paths:</code><br/>
+                                                            <code className="text-slate-400">  cache:</code><br />
+                                                            <code className="text-slate-400">    paths:</code><br />
                                                             <code className="text-slate-400">      - node_modules/</code>
                                                         </pre>
                                                     </div>

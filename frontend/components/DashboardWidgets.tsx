@@ -80,7 +80,7 @@ export const SecurityCenter = () => (
                     <span className="text-[10px] uppercase font-bold tracking-wider bg-red-500/20 text-red-400 px-2 py-1 rounded">Critical</span>
                 </div>
                 <div className="flex justify-between items-center pt-2 border-t border-red-500/10 w-full">
-                    <span className="text-xs text-slate-300 flex items-center gap-2"><span className="text-emerald-400 animate-pulse">●</span> Agent drafted PR #42</span>
+                    <span className="text-xs text-red-400 flex items-center gap-2"><span className="text-red-500 animate-pulse">●</span> Action Required</span>
                     <button className="text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-md transition-colors shadow-lg">Review Sync</button>
                 </div>
             </div>

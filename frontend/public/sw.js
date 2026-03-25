@@ -33,35 +33,15 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
+// Pass everything to network in demo mode to prevent Next.js UI chunks failing to load
 self.addEventListener("fetch", (event) => {
-  // Network first strategy for API, Cache slightly for others
-  const url = new URL(event.request.url);
-
-  if (url.pathname.startsWith('/api') || url.pathname.startsWith('/ws')) {
+    // Avoid caching Next.js dev bundles or layout CSS, simply pass through
     event.respondWith(
-      fetch(event.request).catch(() => {
-        return new Response(JSON.stringify({ error: "offline mode" }), { headers: { 'Content-Type': 'application/json' } });
+      fetch(event.request).catch((err) => {
+        console.warn("SW fetch error", err);
+        return new Response("Offline", { status: 503 });
       })
     );
-  } else {
-    event.respondWith(
-      caches.match(event.request).then((cachedResponse) => {
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-        return fetch(event.request).then(response => { if (event.request.url.includes('_next/')) return response;
-          return caches.open(CACHE_NAME).then(cache => {
-            if (event.request.method === "GET" && (event.request.url.startsWith('http://') || event.request.url.startsWith('https://'))) {
-              cache.put(event.request, response.clone());
-            }
-            return response;
-          });
-        }).catch(() => {
-          // offline fallback page logic if requested html
-        });
-      })
-    );
-  }
 });
 
 self.addEventListener("push", (event) => {

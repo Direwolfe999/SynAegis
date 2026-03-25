@@ -1,3 +1,4 @@
+import { useTheme } from "./ThemeProvider";
 import React, { useState, useEffect } from "react";
 import { useToast } from "./ToastProvider";
 import { NotificationBell } from "./NotificationBell";
@@ -25,7 +26,7 @@ const MOCK_ALERTS = [
 
 export default function CloudDashboard({ onBack }: { onBack: () => void }) {
     const { addToast, showModal, closeModal } = useToast();
-    const [darkMode, setDarkMode] = useState(true);
+    const { isDarkMode: darkMode, toggleTheme: setDarkMode } = useTheme();
     const [services, setServices] = useState(MOCK_SERVICES);
     const [alerts] = useState(MOCK_ALERTS);
     const [aiOpen, setAiOpen] = useState(true);
@@ -169,7 +170,7 @@ export default function CloudDashboard({ onBack }: { onBack: () => void }) {
     };
 
     return (
-        <div className={`min-h-screen w-full flex flex-col font-sans transition-all duration-500 ease-in-out ${darkMode ? "bg-[#050505] text-slate-200" : "bg-slate-50 text-black font-medium"}`}>
+        <div className={`min-h-screen w-full flex flex-col font-sans transition-all duration-500 ease-in-out ${darkMode ? "bg-[#050505] text-slate-200" : "text-inherit font-medium"}`}>
 
             {/* Header */}
             <header className={`sticky top-0 z-50 px-4 sm:px-6 py-3 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3 backdrop-blur-xl ${darkMode ? "border-white/10 bg-[#050505]/90" : "border-slate-200 bg-white/95"} shadow-sm`}>
@@ -190,7 +191,7 @@ export default function CloudDashboard({ onBack }: { onBack: () => void }) {
 
                 <div className="flex items-center gap-4 self-end sm:self-auto -mt-12 sm:mt-0">
                     <NotificationBell darkMode={darkMode} />
-                    <button onClick={() => setDarkMode(!darkMode)} className="p-2 rounded-full hover:bg-slate-500/10 transition-colors">
+                    <button onClick={() => setDarkMode()} className="p-2 rounded-full hover:bg-slate-500/10 transition-colors">
                         {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                     </button>
                     <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400 border-2 border-[#050505] cursor-pointer"></div>

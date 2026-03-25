@@ -26,6 +26,8 @@ export const metadata: Metadata = {
   },
 }
 
+import { ThemeProvider } from '../components/ThemeProvider';
+
 export default function RootLayout({
   children,
 }: {
@@ -34,6 +36,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <body className="antialiased font-sans text-slate-800 bg-white dark:text-slate-100 dark:bg-[#050505] transition-colors duration-500" suppressHydrationWarning>
+        <ThemeProvider>
         {/* Empty div wrapper blocks extensions from replacing our script tag by mistake */}
         <div suppressHydrationWarning>
           <script dangerouslySetInnerHTML={{
@@ -75,7 +78,11 @@ export default function RootLayout({
 
         <ProductionGuard />
         {children}
-      </body>
+
+      </ThemeProvider>
+      
+    </body>
+    
     </html>
   )
 }

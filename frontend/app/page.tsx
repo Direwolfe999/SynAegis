@@ -71,7 +71,7 @@ function DashboardContent() {
             )}
 
             {showOnboarding !== null && (
-                <main className="relative min-h-screen bg-[#050505] text-slate-200 overflow-x-hidden font-sans flex">
+                <main className="relative min-h-screen overflow-x-hidden font-sans flex">
                     {/* Sidebar Navigation */}
                     {(activeView !== "warroom" && activeView !== "pipelines" && activeView !== "security" && activeView !== "cloud" && activeView !== "settings" && activeView !== "devops") && <Sidebar activeView={activeView} setActiveView={setActiveView} />}
 

@@ -1,3 +1,4 @@
+import { useTheme } from "./ThemeProvider";
 import React, { useState, useEffect, useRef } from "react";
 import { Bell, ShieldAlert, CheckCircle, Info, Activity } from "lucide-react";
 import { useToast } from "./ToastProvider";
