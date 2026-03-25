@@ -51,9 +51,7 @@ export default function RootLayout({
           }} />
         </div>
 
-        <div id="splash-screen" suppressHydrationWarning>
-          <img src="/logos/logo.png" alt="logo" />
-        </div>
+        <div id="splash-screen" suppressHydrationWarning dangerouslySetInnerHTML={{ __html: `<img src="/logos/logo.png" alt="logo" />` }} />
         <script dangerouslySetInnerHTML={{
           __html: `
             function removeSplash() {
@@ -61,7 +59,7 @@ export default function RootLayout({
               if (splash) {
                 splash.classList.add("fade-out");
                 setTimeout(() => {
-                  try { splash.remove(); } catch(e) {}
+                  try { splash.style.display = 'none'; } catch(e) {}
                 }, 500);
               }
             }
