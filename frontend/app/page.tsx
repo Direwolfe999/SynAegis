@@ -21,11 +21,15 @@ function DashboardContent() {
     const { addToast } = useToast();
 
     useEffect(() => {
-        // On line ~25 of frontend/app/page.tsx
         async function checkOnboarding() {
-            // ADD THIS LINE:
-            if (window.location.search.includes('demo')) { setShowOnboarding(true); return; }
-// Made changes here to get my loading screen authentic
+            if (typeof window !== 'undefined' && window.location.search.includes('demo')) {
+                setShowOnboarding(true);
+                return;
+            }
+            if (localStorage.getItem("onboarding_bypass")) {
+                setShowOnboarding(false);
+                return;
+            }
             const status = await fetchOnboardingStatus();
             setShowOnboarding(!status?.completed);
 
