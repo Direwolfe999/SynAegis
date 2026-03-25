@@ -127,6 +127,11 @@ Open a terminal, navigate to the backend folder (cd backend) and start the Uvico
 ```bash
 python -m uvicorn main:app --host 0.0.0.0 --port 8080
 ```
+Or
+When in the Project root folder (SynAegis) start the Uvicorn server:
+```bash
+python -m uvicorn backend.main:app --host 0.0.0.0 --port 8080
+```
 
 **5. Setup and Run the Frontend**
 Open a second terminal, install modules, and run Next.js:
