@@ -22,10 +22,6 @@ function DashboardContent() {
 
     useEffect(() => {
         async function checkOnboarding() {
-            if (typeof window !== 'undefined' && window.location.search.includes('demo')) {
-                setShowOnboarding(true);
-                return;
-            }
             if (localStorage.getItem("onboarding_bypass")) {
                 setShowOnboarding(false);
                 return;
@@ -100,7 +96,7 @@ function DashboardContent() {
                                         <span className="text-cyan-300 uppercase">{activeView}</span>
                                     </div>
                                 )}
-                                
+
                                 {activeView !== "dashboard" ? renderSecondaryView() : (
                                     <GlobalCommandDashboard setActiveView={setActiveView} />
                                 )}
