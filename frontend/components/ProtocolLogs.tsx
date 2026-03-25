@@ -1,17 +1,57 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Props = {
     logs: string[];
 };
 
+function TypedLogLine({ text, className, isNew }: { text: string, className: string, isNew: boolean }) {
+    const [displayedText, setDisplayedText] = useState(isNew ? "" : text);
+    
+    useEffect(() => {
+        if (!isNew) return;
+        
+        let i = 0;
+        const limit = text.length;
+        // Fast typing speed for logs
+        const interval = setInterval(() => {
+            if (i < limit - 2) {
+                 // type multiple chars at once to keep it snappy for long agent responses
+                 i += 3;
+            } else {
+                 i++;
+            }
+            if (i > limit) i = limit;
+            
+            setDisplayedText(text.slice(0, i));
+            
+            if (i === limit) {
+                clearInterval(interval);
+            }
+        }, 15); 
+        
+        return () => clearInterval(interval);
+    }, [text, isNew]);
+
+    return <p className={className}>{displayedText}</p>;
+}
+
 export default function ProtocolLogs({ logs }: Props) {
     const endRef = useRef<HTMLDivElement | null>(null);
+    const [initialCount, setInitialCount] = useState(0);
 
     useEffect(() => {
-        endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+        // Record how many logs existed at mount so we don't animate them
+        setInitialCount(logs.length);
+    }, []);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+        }, 100);
+        return () => clearTimeout(timer);
     }, [logs]);
 
     return (
@@ -26,7 +66,7 @@ export default function ProtocolLogs({ logs }: Props) {
                     <div className="mb-2 flex items-center justify-between">
                         <p className="text-[10px] uppercase tracking-[0.22em] text-cyan-200">Protocol Logs</p>
                         <button
-                            onClick={() => navigator.clipboard.writeText(logs.join('\\n'))}
+                            onClick={() => navigator.clipboard.writeText(logs.join('\n'))}
                             className="rounded border border-white/20 bg-white/5 px-2 py-0.5 text-[9px] uppercase tracking-wider text-slate-300 hover:bg-white/10"
                         >
                             Copy
@@ -42,9 +82,12 @@ export default function ProtocolLogs({ logs }: Props) {
                             if (isError) colorClass = "text-red-400 font-bold";
                             
                             return (
-                                <p key={`${i}-${line.slice(0, 12)}`} className={`mb-1 font-mono leading-relaxed tracking-wide ${colorClass}`}>
-                                    {line}
-                                </p>
+                                <TypedLogLine 
+                                    key={`${i}-${line.slice(0, 12)}`} 
+                                    text={line} 
+                                    className={`mb-1 font-mono leading-relaxed tracking-wide ${colorClass}`} 
+                                    isNew={i >= initialCount}
+                                />
                             );
                         })}
                         <div ref={endRef} />
