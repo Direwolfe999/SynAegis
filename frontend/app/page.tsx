@@ -81,13 +81,17 @@ function DashboardContent() {
                     {/* Main Content Area - padded left for sidebar */}
                     <div className={`flex-1 min-w-0 transition-all duration-300 ${activeView !== 'warroom' && activeView !== 'pipelines' && activeView !== 'security' && activeView !== 'cloud' && activeView !== 'settings' && activeView !== 'devops' ? 'mb-20 md:ml-20 md:mb-0' : ''}`}>
                         {/* Background Effects */}
-                        <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_10%,rgba(6,182,212,0.15),transparent_50%)] pointer-events-none" />
+                        {activeView !== 'warroom' && (
+                            <>
+                                <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_10%,rgba(6,182,212,0.15),transparent_50%)] pointer-events-none" />
                         <div className="fixed inset-0 flex z-0 pointer-events-none items-center justify-center opacity-[0.05]">
                             <img src="/logos/full.png" alt="SynAegis Full Motif" className="w-[800px] h-[800px] object-contain grayscale blur-[2px]" />
                         </div>
                         <div className="fixed inset-0 pointer-events-none opacity-20 z-0" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '50px 50px' }} />
+                            </>
+                        )}
 
-                        <div className="min-h-screen w-full bg-[#050505] text-white">
+                        <div className={`min-h-screen w-full ${activeView === 'warroom' ? 'bg-transparent' : 'bg-[#050505]'} text-white`}>
                             <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-10 py-8 mb-32 flex flex-col gap-8">
                                 {activeView !== "dashboard" && activeView !== "warroom" && (
                                     <div className="flex items-center gap-2 text-xs font-mono text-slate-500 tracking-widest px-2">

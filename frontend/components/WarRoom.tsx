@@ -720,7 +720,7 @@ export default function WarRoom() {
 
                         {/* 1. TOP STATUS BAR + ORB SECTION */}
                         <section className="flex flex-col items-center justify-start pt-6 pb-2 md:pt-0 md:pb-0 md:justify-center px-1 md:px-2 z-[30] md:absolute md:inset-0 pointer-events-none w-full shadow-md md:shadow-none bg-black/10 md:bg-transparent">
-                            <div className="text-center w-full max-w-full pointer-events-auto">
+                            <div className="text-center w-full max-w-full pointer-events-none [&_button]:pointer-events-auto [&_span]:pointer-events-auto">
                                 <div className="mb-4 flex flex-wrap items-center justify-center gap-1.5 md:gap-2 text-[9px] sm:text-[10px] uppercase tracking-[0.16em]">
                                     <span className={`rounded-full border px-3 py-1.5 min-h-[32px] md:min-h-[36px] flex items-center justify-center whitespace-nowrap ${backendMode === "fallback" ? "border-amber-300/40 bg-amber-500/10 text-amber-200" : "border-emerald-300/40 bg-emerald-500/10 text-emerald-200"}`}>
                                         {backendMode === "fallback" ? "fallback mode" : "live mode"}
@@ -761,7 +761,18 @@ export default function WarRoom() {
                                 <div className="mx-auto mb-3 h-px w-10 bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent sm:mb-4 sm:w-14" />
 
                                 {/* 2. ORB SECTION */}
-                                <div className="mt-4 md:mt-0 mb-4 md:mb-0 scale-75 sm:scale-90 md:scale-100 transition-transform flex justify-center mx-auto relative max-w-full px-2">
+                                <div 
+                                    className="mt-4 md:mt-0 mb-4 md:mb-0 scale-75 sm:scale-90 md:scale-100 transition-transform flex justify-center mx-auto relative max-w-full px-2 cursor-pointer"
+                                    onClick={() => {
+                                        if (orbState === "idle") {
+                                            void connect();
+                                        } else {
+                                            sendJson({ type: "barge_in" });
+                                            setRippling(true);
+                                            window.setTimeout(() => setRippling(false), 280);
+                                        }
+                                    }}
+                                >
                                     <SynAegisOrb state={orbState} userLevel={userLevel} aiLevel={aiLevel} rippling={rippling} />
                                 </div>
 
