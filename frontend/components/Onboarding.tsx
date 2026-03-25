@@ -35,7 +35,31 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     const [index, setIndex] = useState(0);
     const [typedText, setTypedText] = useState('');
 
+    
+    // Prevent scrolling behind onboarding
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        document.documentElement.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+        }
+    }, []);
+
+    
+    // Prevent scrolling behind onboarding
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        document.documentElement.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+        }
+    }, []);
+
     // Typewriter effect logic
+
+
     useEffect(() => {
         let currentText = '';
         let i = 0;

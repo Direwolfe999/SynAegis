@@ -121,6 +121,29 @@ export default function WarRoom() {
     const [lastPingMs, setLastPingMs] = useState<number | null>(null);
     const [promptText, setPromptText] = useState("");
     const [isEntered, setIsEntered] = useState(false);
+    const [isEntering, setIsEntering] = useState(false);
+
+    const handleEnter = useCallback(() => {
+        setIsEntering(true);
+        setTimeout(() => {
+            setIsEntering(false);
+            setIsEntered(true);
+        }, 2500);
+    }, []);
+
+    useEffect(() => {
+        if (!isEntered) {
+            document.body.style.overflow = 'hidden';
+            document.documentElement.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+        };
+    }, [isEntered]);
     const [mobileTab, setMobileTab] = useState<"logs" | "vision" | "diagnostics">("logs");
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -610,7 +633,7 @@ export default function WarRoom() {
         <>
             {/* Intro Screen */}
             <AnimatePresence>
-                {!isEntered && (
+                {!isEntered && !isEntering && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -635,7 +658,7 @@ export default function WarRoom() {
                                 initial={{ y: 20, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1 }}
                                 transition={{ delay: 0.4 }}
-                                onClick={() => setIsEntered(true)}
+                                onClick={handleEnter}
                                 className="group relative overflow-hidden rounded-xl border border-cyan-500/30 bg-cyan-950/20 px-8 sm:px-12 py-3 sm:py-4 backdrop-blur-sm sm:backdrop-blur-md transition-all hover:bg-cyan-900/40 hover:border-cyan-400 w-full max-w-xs min-h-[44px]"
                             >
                                 <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
@@ -655,6 +678,45 @@ export default function WarRoom() {
                                 <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Gemini Attached</span>
                             </motion.div>
                         </div>
+                    </motion.div>
+                )}
+                
+                {isEntering && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0, scale: 1.05 }}
+                        transition={{ duration: 0.4 }}
+                        className="fixed inset-0 z-[250] flex flex-col items-center justify-center bg-[#050505]/95 backdrop-blur-xl pointer-events-auto"
+                    >
+                        <motion.div 
+                            initial={{ scaleY: 0 }}
+                            animate={{ scaleY: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.6, ease: "easeOut" }}
+                            className="relative w-full h-[30vh] sm:h-[35vh] bg-cyan-950/20 border-y border-cyan-500/40 flex items-center justify-center overflow-hidden"
+                        >
+                            <div className="absolute inset-0 bg-[linear-gradient(rgba(6,182,212,0.15)_1px,transparent_1px),linear-gradient(90deg,rgba(6,182,212,0.15)_1px,transparent_1px)] bg-[size:40px_40px] opacity-40 [mask-image:linear-gradient(to_bottom,transparent,black_20%,black_80%,transparent)] animate-[pan_10s_linear_infinite]" />
+                            <div className="relative z-10 flex flex-col items-center text-center px-4 w-full">
+                                <motion.div 
+                                    animate={{ opacity: [0.6, 1, 0.6] }}
+                                    transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+                                    className="text-cyan-300 text-xs sm:text-base md:text-xl tracking-[0.3em] sm:tracking-[0.4em] uppercase font-light drop-shadow-[0_0_15px_rgba(6,182,212,0.5)] flex items-center gap-3 sm:gap-4"
+                                >
+                                    <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-none bg-cyan-400 animate-spin" />
+                                    Syncing Node // SynAegis Initializing Pathway...
+                                    <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-none bg-cyan-400 animate-spin" />
+                                </motion.div>
+                                <div className="mt-8 w-48 sm:w-72 h-px bg-cyan-950/50 relative overflow-hidden">
+                                    <motion.div
+                                        initial={{ x: "-100%" }}
+                                        animate={{ x: "100%" }}
+                                        transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                                        className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_10px_rgba(6,182,212,0.8)]"
+                                    />
+                                </div>
+                            </div>
+                        </motion.div>
                     </motion.div>
                 )}
             </AnimatePresence>
