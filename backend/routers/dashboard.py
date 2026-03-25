@@ -36,8 +36,8 @@ async def get_ai_insights():
 def calculate_health(cloud, security, pipelines):
     score = 100
     score -= cloud.get("cpu_usage", 0) * 0.2
-    score -= security.get("threats", 0) * 2
-    score -= pipelines.get("failed", 0) * 3
+    score -= security.get("active_incidents", 0) * 4
+    score -= pipelines.get("failed", 0) * 5
     return max(0, int(score))
 
 @router.get("/dashboard/full-overview")

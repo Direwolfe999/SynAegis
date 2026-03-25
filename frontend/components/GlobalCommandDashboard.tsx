@@ -129,7 +129,7 @@ export default function GlobalCommandDashboard({ setActiveView }: { setActiveVie
         <StatCard loading={loading} delay={0.1} title="Health Score" value={data?.health_score || 0} sub="Overall" icon={Activity} colorClass="hover:border-emerald-500/50 text-emerald-400" />
         <StatCard loading={loading} delay={0.2} title="Active Pipelines" value={data?.pipelines?.running || 0} sub={`${data?.pipelines?.total || 0} Total`} icon={GitCommit} colorClass="hover:border-blue-500/50 text-blue-400" />
         <StatCard loading={loading} delay={0.3} title="Security Alerts" value={data?.security?.active_incidents || 0} sub="Critical" icon={Shield} colorClass="hover:border-red-500/50 text-red-400" />
-        <StatCard loading={loading} delay={0.4} title="Cloud Nodes" value={data?.cloud?.active_services || 0} sub="Running" icon={Server} colorClass="hover:border-cyan-500/50 text-cyan-400" />
+        <StatCard loading={loading} delay={0.4} title="Cloud Nodes" value={data?.cloud?.services || 0} sub="Running" icon={Server} colorClass="hover:border-cyan-500/50 text-cyan-400" />
         <StatCard loading={loading} delay={0.5} title="System Load" value={`${data?.cloud?.cpu_usage || 0}%`} sub="Avg" icon={Cpu} colorClass="hover:border-purple-500/50 text-purple-400" />
         <StatCard loading={loading} delay={0.6} title="Carbon Usage" value={`${data?.cloud?.carbon || 0} kg`} sub="Today" icon={Cloud} colorClass="hover:border-emerald-500/50 text-emerald-400" />
       </div>
@@ -139,7 +139,7 @@ export default function GlobalCommandDashboard({ setActiveView }: { setActiveVie
 
         {/* LEFT COLUMN: Deep Observability (Span 8) */}
         <div className="xl:col-span-8 flex flex-col gap-4 sm:gap-6 w-full max-w-full">
-          
+
           <div className="p-4 sm:p-5 md:p-6 rounded-2xl sm:rounded-3xl bg-white/[0.02] border border-white/5 backdrop-blur-md w-full overflow-hidden">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
               <h3 className="text-base sm:text-lg font-medium text-white flex items-center gap-2">
@@ -229,7 +229,7 @@ export default function GlobalCommandDashboard({ setActiveView }: { setActiveVie
                         <span className="text-slate-300 font-mono truncate max-w-[100px] sm:max-w-none">{name}</span>
                       </div>
                       <span className={`flex items-center gap-1 sm:gap-2 ${isRunning ? 'text-blue-400' : 'text-emerald-400'} whitespace-nowrap`}>
-                        {isRunning ? <Clock size={14} className="animate-spin" /> : <CheckCircle size={14} />} 
+                        {isRunning ? <Clock size={14} className="animate-spin" /> : <CheckCircle size={14} />}
                         <span className="inline">{isRunning ? 'Deploying...' : 'Success'}</span>
                       </span>
                     </div>

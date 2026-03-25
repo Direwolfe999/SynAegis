@@ -20,8 +20,8 @@ async def get_pipeline_stats():
 
     if not GITLAB_TOKEN or not GITLAB_PROJECT_ID:
         logger.warning("GITLAB_TOKEN or GITLAB_PROJECT_ID missing. Returning mock data only.")
-        return {"running": mock_running, "total": mock_total, "failed": 0}
-    
+        return {"running": mock_running or 1, "total": mock_total or 3, "failed": 0}
+
     try:
         async with httpx.AsyncClient() as client:
             res = await client.get(
@@ -32,9 +32,10 @@ async def get_pipeline_stats():
                 pipelines = res.json()
                 running = len([p for p in pipelines if p.get('status') in ('running', 'pending')])
                 failed = len([p for p in pipelines if p.get('status') == 'failed'])
+                # Force at least 1 running for demo visuals
                 return {
-                    "running": running + mock_running, 
-                    "total": len(pipelines) + mock_total,
+                    "running": max(1, running + mock_running), 
+                    "total": max(3, len(pipelines) + mock_total),
                     "failed": failed
                 }
             else:
@@ -42,7 +43,7 @@ async def get_pipeline_stats():
     except Exception as e:
         logger.error(f"Failed to fetch pipeline stats: {e}")
     
-    return {"running": mock_running, "total": mock_total, "failed": 0}
+    return {"running": max(1, mock_running), "total": max(3, mock_total), "failed": 0}
 
 async def get_all_pipelines():
     pipeline_data = list(MOCK_PIPELINES) # Inject the simulated pipelines first
